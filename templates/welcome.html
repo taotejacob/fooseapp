@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="welcome">
+
+  <div data-role="header">
+    <a href="/" data-icon="home">Home</a>
+        <h1>Welcome back {{user_nickname}}</h1>
+        <a href="{{logout_url}}" data-icon="minus">Log Out</a>
+  </div><!-- /header -->
+
+	<div role="main" class="ui-content">
+      <h2>Monthly League Standings</h2>
+        <table data-role="table" id="results_table" class="ui-responsive table-stroke">
+          <thead>
+           <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Win %</th>
+          </tr>
+          <tbody>
+            {% for player in num_players %}
+            <tr>
+              <th>{{player + 1}}</th>
+              <td>{{win_data[player][0]}}</td>
+              <td>{{win_data[player][1]*100}}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>  
+
+      <br>
+
+      <h2>Recent Games</h2>
+
+      <table data-role="table" id="results_game_table" class="ui-responsive table-stroke">
+        <thead>
+         <tr>
+          <th>Winner</th>
+          <th>Opponent</th>
+          <th>Score</th>
+        </tr>
+        <tbody>
+          {% for r in range(5) %}
+          <tr>
+            <th>{{p_out[r][0]}}</th>
+            <td>{{p_out[r][1]}}</td>
+            <td>{{p_out[r][2]}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <a href="players" class="ui-btn">Input Scores</a>    
+
+	</div><!-- /content -->
+
+</div><!-- /page one -->
+
+
+{% endblock %}

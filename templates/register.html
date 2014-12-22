@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="register">
+
+    <div data-role="header">
+        <a href="/" data-icon="home">Home</a>
+        <h1>Welcome back {{user_nickname}}</h1>
+        <a href="{{logout_url}}" data-icon="minus">Log Out</a>
+    </div><!-- /header -->
+
+  <div role="main" class="ui-content">
+        <p>Uh oh, you're not a registered player. Before we can get started, we'll need to put you in our player database. This allows us to track your games and calculate player statistics.</p>
+    <br> 
+
+    <form data-ajax="false" method="post">
+        <fieldset data-role="log_in">         
+          <input type="text" name="first_name" id="first_name" placeholder="first name">
+          <input type="text" name="last_name" id="last_name" placeholder="last name">
+          <input type="email" name="work_email" id="work_email" placeholder="email@eab.com">
+        </fieldset>
+      <input type="submit" value="Register">
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

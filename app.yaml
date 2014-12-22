@@ -1,0 +1,27 @@
+application: eabfoose-01231
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+libraries:
+- name: jinja2
+  version: latest
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+
+# you missed this section. It allows all .css files inside stylesheets
+- url: /stylesheets/(.*\.(css)) 
+  static_files: stylesheets/\1
+  upload: stylesheets/(.*\.(css))
+
+- url: /stylesheets/(.*\.(js))
+  static_files: stylesheets/\1
+  upload: stylesheets/(.*\.(js))
+
+
+- url: /.*
+  script: FooseMain.application
+  login: required

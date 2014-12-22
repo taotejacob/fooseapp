@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="scores">
+
+    <div data-role="header">
+        <a href="/" data-icon="home">Home</a>
+        <h1>Welcome back {{user_nickname}}</h1>
+        <a href="{{logout_url}}" data-icon="minus">Log Out</a>
+    </div><!-- /header -->
+
+	<div role="main" class="ui-content">
+		<h2>Who played on the winning team?</h2>
+	
+            <form data-ajax="false" method="post">
+                <fieldset data-role="group3">
+                    <legend>What were the scores?</legend> 
+                    <br>
+
+                    {% for i in team_range %}
+                        <label for="score_{{ i }}">{{team_names[i]}}</label>
+                        <input type="number" name="score_{{i+1}}" id="score_{{ i }}" max="9" min="0" placeholder="input score">
+                    {% endfor %}
+                    
+                </fieldset>
+                <br>
+                <input type="submit" value="Submit">
+            </form>
+
+	</div><!-- /content -->
+
+</div><!-- /page one -->
+
+
+{% endblock %}

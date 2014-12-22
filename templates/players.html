@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="players">
+
+	<div data-role="header">
+		<a href="/" data-icon="home">Home</a>
+        <h1>Welcome back {{user_nickname}}</h1>
+        <a href="{{logout_url}}" data-icon="minus">Log Out</a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content">
+		<h2>Who was playing?</h2>
+        <p><i>{{size_error}}</i></p>
+	
+            <form data-ajax="false" method="post">
+                <fieldset data-role="group1">
+                    <legend>Select your team:</legend>
+                    {% for player in num_players%}
+                    <input type="checkbox" name="team_1" id="{{player+1}}" value="{{player_set[player]}}">
+                    <label for="{{player+1}}">{{player_set[player]}}</label>
+                    {% endfor %}
+                </fieldset>
+
+                <br>
+
+                <fieldset data-role="group2">
+                    <legend>Select your opponent(s):</legend>
+                    {% for player in num_players%}
+                    <input type="checkbox" name="team_2" id="{{player+2+num_players[-1]}}" value="{{player_set[player]}}">
+                    <label for="{{player+2+num_players[-1]}}">{{player_set[player]}}</label>
+                    {% endfor %}
+                    <input type="text" name="team_2" id="{{(num_players[-1]+1)*2 + 1}}" placeholder="Other Name"/>
+                </fieldset>
+                <br>
+                <input type="submit" value="Submit">
+            </form>
+
+            <br>
+
+            
+
+	</div><!-- /content -->
+
+</div><!-- /page one -->
+
+
+{% endblock %}
