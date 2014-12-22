@@ -98,7 +98,8 @@ class Welcome(Handler):
 		else:
 			num_players = [0,1]
 			win_data = [["", ""],["", ""]]
-			p_out = [["", "",""],["", "",""],["", "",""],["", "",""],["", "",""],["", "",""]] 
+			p_out = [["", "",""],["", "",""],["", "",""],["", "",""],["", "",""],["", "",""]]
+			last_games = range(3)
 
 		self.render("welcome.html", win_data=win_data, num_players=num_players, p_out=p_out, last_games=last_games ,logout_url=logout_url, user_nickname=user_name.nickname())
 
