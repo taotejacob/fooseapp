@@ -88,19 +88,19 @@ class Welcome(Handler):
 			self.redirect('register')
 
 		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
-		
+
 		if players.count()>0:
 			p_out = gameSummer(players) 		#get recent games
 			win_data = winRank(players) 		#get win percentages
 			num_players = range(len(win_data)) 	#get number of players
 			last_games = range(min(players.count()/2, 5))
-		
+
 		else:
 			num_players = [0,1]
 			win_data = [["", ""],["", ""]]
-			p_out = [["", "",""],["", "",""],["", "",""],["", "",""],["", "",""],["", "",""]]
-		
-		self.render("welcome.html", win_data=win_data, num_players=num_players, p_out=p_out, last_games=last_games, logout_url=logout_url, user_nickname=user_name.nickname())
+			p_out = [["", "",""],["", "",""],["", "",""],["", "",""],["", "",""],["", "",""]] 
+
+		self.render("welcome.html", win_data=win_data, num_players=num_players, p_out=p_out, last_games=last_games ,logout_url=logout_url, user_nickname=user_name.nickname())
 
 
 
@@ -196,15 +196,16 @@ class Players(Handler):
 
 class Test(Handler):
 	def get(self):
-		user_name = users.get_current_user()
-		# nickname = user_name.nickname()
-		qry = Account.query().fetch()
-		player_set = GetPlayers(qry)
-		q = player_set
+		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
-		num_players=range(len(player_set))
+		p_out = gameSummer(players) 		#get recent games
+		win_data = winRank(players) 		#get win percentages
+		num_players = range(len(win_data)) 	#get number of players
 
-		self.render('tester.html', text=q, num_players=num_players, player_set=player_set)
+		players = range(players.count()/2)
+
+
+		self.render('tester.html', text=players, p_out=p_out, win_data=win_data, num_players=num_players)
 
 
 application = webapp2.WSGIApplication([('/', Welcome),
