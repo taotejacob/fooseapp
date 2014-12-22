@@ -100,7 +100,7 @@ class Welcome(Handler):
 			win_data = [["", ""],["", ""]]
 			p_out = [["", "",""],["", "",""],["", "",""],["", "",""],["", "",""],["", "",""]]
 		
-		self.render("welcome.html", win_data=win_data, num_players=num_players, p_out=p_out, logout_url=logout_url, user_nickname=user_name.nickname())
+		self.render("welcome.html", win_data=win_data, num_players=num_players, p_out=p_out, last_games=last_games, logout_url=logout_url, user_nickname=user_name.nickname())
 
 
 
