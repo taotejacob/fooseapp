@@ -229,3 +229,32 @@ def gameSummer(players):
 	games = sorted(games, key = lambda x: x[3], reverse = False) #sort
 
 	return map(list,games)
+
+#############################
+###
+###  output generator
+###
+#############################
+
+def output_make(players):
+	games = []
+
+	for row in players:
+		game_id = row.game_id
+		game_type = row.game_type
+		player = row.player_id
+		player_2 = row.player_teammate_id
+		opp = row.opp_id
+		player_score = row.player_score
+		opp_score = row.opp_score
+		date = row.date
+		out = [game_id, game_type, player, player_2, opp, player_score, opp_score, date]
+		games.append(out)
+
+	return(games)
+
+
+
+
+
+
