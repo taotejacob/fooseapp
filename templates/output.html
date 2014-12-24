@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="output">
+
+  <div data-role="header">
+    <a href="/" data-icon="home">Home</a>
+        <h1>Welcome back {{user_nickname}}</h1>
+        <a href="{{logout_url}}" data-icon="minus">Log Out</a>
+  </div><!-- /header -->
+
+<div role="main" class="ui-content">
+
+      <h2>Raw Data</h2>
+        <table data-role="table" id="output_table" class="ui-responsive table-stroke">
+          <thead>
+           <tr>
+            <th>Game ID</th>
+            <th>Type</th>
+            <th>Player</th>
+            <th>Player 2</th>
+            <th>Opponent</th>
+            <th>Player Score</th>
+            <th>Opponent score</th>
+            <th>Date</th>
+          </tr>
+          <tbody>
+            {% for row in n_rows %}
+            <tr>
+              <th>{{data[row][0]}}</th>
+              <td>{{data[row][1]}}</td>
+              <td>{{data[row][2]}}</td>
+              <td>{{data[row][3]}}</td>
+              <td>{{data[row][4]}}</td>
+              <td>{{data[row][5]}}</td>
+              <td>{{data[row][6]}}</td>
+              <td>{{data[row][7]}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>  
+
+</div>
+
+
+{% endblock %}

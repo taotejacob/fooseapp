@@ -97,9 +97,9 @@ class Welcome(Handler):
 
 		else:
 			num_players = [0,1]
-			win_data = [["", ""], ["", ""]]
-			p_out = [["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""]]
-			last_games = range(5)
+			win_data = [["", ""],["", ""]]
+			p_out = [["--", "--","--"],["--", "--","--"],["", "",""],["", "",""],["", "",""],["", "",""]]
+			last_games = range(5) 
 
 		self.render("welcome.html", win_data=win_data, num_players=num_players, p_out=p_out, last_games=last_games ,logout_url=logout_url, user_nickname=user_name.nickname())
 
@@ -193,20 +193,26 @@ class Players(Handler):
 		else:
 			self.render("players.html", size_error = "There was something wrong with the teams you selected", logout_url=logout_url, user_nickname=user_name.nickname())
 
+class Output(Handler):
+	def get(self):
+		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
+		data = output_make(players)
+		n_rows = range(len(data))
+
+		self.render('output.html', data = data, n_rows=n_rows)	
+
+
 
 
 class Test(Handler):
 	def get(self):
 		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
-		p_out = gameSummer(players) 		#get recent games
-		win_data = winRank(players) 		#get win percentages
-		num_players = range(len(win_data)) 	#get number of players
-
-		players = range(players.count()/2)
+		data = output_make(players)
+		n_rows = range(len(data))
 
 
-		self.render('tester.html', text=players, p_out=p_out, win_data=win_data, num_players=num_players)
+		self.render('tester.html', text=players, data = data, n_rows=n_rows)
 
 
 application = webapp2.WSGIApplication([('/', Welcome),
@@ -216,5 +222,6 @@ application = webapp2.WSGIApplication([('/', Welcome),
 									   ('/log-out', Logout),
 									   ('/register', Register),
 									   ('/tester', Test),
+									   ('/output', Output),
 									   ('/holder_log', Holder_log)],
 									    debug=True)
