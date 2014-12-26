@@ -90,18 +90,24 @@ class Welcome(Handler):
 		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
 		if players.count()>0:
-			p_out = gameSummer(players) 		#get recent games
+			# p_out = gameSummer(players) 		#get recent games
 			win_data = winRank(players) 		#get win percentages
 			num_players = range(len(win_data)) 	#get number of players
-			last_games = range(min(players.count()/2, 5))
+			# last_games = range(min(players.count()/2, 5))
 
 		else:
 			num_players = [0,1]
 			win_data = [["", ""],["", ""]]
 			p_out = [["--", "--","--"],["--", "--","--"],["", "",""],["", "",""],["", "",""],["", "",""]]
-			last_games = range(5) 
+			# last_games = range(5) 
 
-		self.render("welcome.html", win_data=win_data, num_players=num_players, p_out=p_out, last_games=last_games ,logout_url=logout_url, user_nickname=user_name.nickname())
+		self.render("welcome.html", 
+			win_data=win_data, 
+			num_players=num_players, 
+			# p_out=p_out, 
+			# last_games=last_games,
+			logout_url=logout_url, 
+			user_nickname=user_name.nickname())
 
 
 
@@ -206,13 +212,25 @@ class Output(Handler):
 
 class Test(Handler):
 	def get(self):
-		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
+		gamesDB = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
-		data = output_make(players)
-		n_rows = range(len(data))
+		playerlist = playerLister(gamesDB)
+		gMatrix = gameMatrix(gamesDB, playerlist)
 
+		ngames = gameSummer(gMatrix)
+		win_pct = winPct(gamesDB, playerlist, gMatrix, ngames)
+		gdiff = pointDiff(gamesDB, playerlist)
 
-		self.render('tester.html', text=players, data = data, n_rows=n_rows)
+		out = scoreDiffAdj(gMatrix, gdiff)
+		gdg = out[0]
+		gdgadj = out[1]
+
+		nplayers = range(len(playerlist))
+		statlist = statSorter(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff, 2), roundCleaner(gdgadj, 2))
+
+		self.render('tester.html', 
+			nplayers = nplayers, 
+			statlist = statlist)
 
 
 application = webapp2.WSGIApplication([('/', Welcome),

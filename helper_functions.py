@@ -253,8 +253,107 @@ def output_make(players):
 
 	return(games)
 
+#########################
+###
+###  Stats Calculators
+###
+#########################
+
+def playerLister(gamesDB):
+	playerlist = []
+	for row in gamesDB:
+		playerlist.append(str(row.player_id))
+	return list(set(playerlist))
 
 
+def playerMatrix(gamesDB, player_list, name):
+	ngames = []
+	for player in player_list:
+		i = 0
+		for row in gamesDB:
+			if row.player_id == name and row.opp_id == player:
+				i = i + 1
+		ngames.append(i)
+	return(ngames)
 
+def gameMatrix(gamesDB, player_list):
+	ngames = []
+	for player in player_list:
+		ngames.append(playerMatrix(gamesDB, player_list, player))
+	return(ngames)
 
+def playerpointDiff(gamesDB, name):
+	player_pts = 0
+	opp_pts = 0
+
+	for row in gamesDB:
+		if row.player_id == name:
+			player_pts = player_pts + row.player_score_z
+			opp_pts = opp_pts + row.opp_score_z
+
+	return(player_pts - opp_pts)
+
+def pointDiff(gamesDB, player_list):
+	point_diff = []
+	for name in player_list:
+		diff = playerpointDiff(gamesDB, name)
+		point_diff.append(diff)
+	return(point_diff)
+
+def gameSummer(gMatrix):
+	ngames = [] #total games each player played
+	for g in gMatrix:
+		ngames.append(sum(g))
+	return(ngames)
+
+def scoreDiffAdj(gMatrix, gdiff):
+
+	ngames = gameSummer(gMatrix)
+
+	gdg = [] #each players point differential per game played
+	for g in range(len(gdiff)):
+		if gdiff[g] == 0 or ngames[g] == 0:
+			out = 0
+		else:
+			out = float(gdiff[g])/float(ngames[g])
+		gdg.append(out)
+
+	adjgdg = [] #adj point differential
+	for p in range(len(gdg)):
+		gameShare = []
+		for g in range(len(gdiff)):
+			if ngames[p] > 0:
+				out = float(gMatrix[p][g]) / float(ngames[p])
+				out = out * float(gdg[g])
+			else:
+				out = 0
+			gameShare.append(out)
+		adjgdg.append(gdg[p]+sum(gameShare))
+
+	output = [gdg, adjgdg]
+	return(output)
+
+def winPct(gamesDB, player_list, gMatrix, ngames):
+
+	win_pct = []
+
+	for p in range(len(player_list)):
+		win = 0
+		for row in gamesDB:
+			if row.player_id == player_list[p]:
+				win = win + row.player_win
+		win_pct.append(float(win) / float(ngames[p]))
+
+	return win_pct
+
+def roundCleaner(mylist, n):
+	newlist = []
+	for i in mylist:
+		i = round(float(i),n)
+		newlist.append(i)
+	return(newlist)
+
+def statSorter(playerlist, ngames, win_pct, gdiff, gdgadj):
+	combine_list = sorted(zip(win_pct, playerlist, ngames, gdiff, gdgadj), reverse=True)
+	return combine_list
 
