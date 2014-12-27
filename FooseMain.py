@@ -90,22 +90,17 @@ class Welcome(Handler):
 		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
 		if players.count()>0:
-			# p_out = gameSummer(players) 		#get recent games
 			win_data = winRank(players) 		#get win percentages
 			num_players = range(len(win_data)) 	#get number of players
-			# last_games = range(min(players.count()/2, 5))
 
 		else:
 			num_players = [0,1]
 			win_data = [["", ""],["", ""]]
-			p_out = [["--", "--","--"],["--", "--","--"],["", "",""],["", "",""],["", "",""],["", "",""]]
-			# last_games = range(5) 
+
 
 		self.render("welcome.html", 
 			win_data=win_data, 
 			num_players=num_players, 
-			# p_out=p_out, 
-			# last_games=last_games,
 			logout_url=logout_url, 
 			user_nickname=user_name.nickname())
 
@@ -207,30 +202,77 @@ class Output(Handler):
 
 		self.render('output.html', data = data, n_rows=n_rows)	
 
+class Standings(Handler):
+	def get(self):
+		user_name = users.get_current_user()
+		gamesDB = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
+		playerlist1v1 = playerLister(gamesDB,1 )
+		gMatrix1v1 = gameMatrix(gamesDB, playerlist1v1, 1)
+		statlist1v1 = statsTable(gamesDB, gMatrix1v1, playerlist1v1, 1)
+		nplayers1v1 = range(len(playerlist1v1))
+
+		playerlist2v2 = playerLister(gamesDB, 2)
+		gMatrix2v2 = gameMatrix(gamesDB, playerlist2v2, 2)	
+		statlist2v2 = statsTable(gamesDB, gMatrix2v2, playerlist2v2, 2)
+		nplayers2v2 = range(len(playerlist2v2))
+
+		playerlist1v2 = playerLister(gamesDB, 3)
+		gMatrix1v2 = gameMatrix(gamesDB, playerlist1v2, 3)	
+		statlist1v2 = statsTable(gamesDB, gMatrix1v2, playerlist1v2, 3)
+		nplayers1v2 = range(len(playerlist1v2))
+
+		self.render('tester.html',
+			nplayers1v1 = nplayers1v1,
+			statlist1v1 = statlist1v1,
+			nplayers2v2 = nplayers2v2,
+			statlist2v2 = statlist2v2,
+			nplayers1v2 = nplayers1v2,
+			statlist1v2 = statlist1v2,
+			logout_url=logout_url, 
+			user_nickname=user_name.nickname())
 
 
 class Test(Handler):
 	def get(self):
 		gamesDB = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
-		playerlist = playerLister(gamesDB)
-		gMatrix = gameMatrix(gamesDB, playerlist)
+		playerlist1v1 = playerLister(gamesDB,1 )
+		gMatrix1v1 = gameMatrix(gamesDB, playerlist1v1, 1)
+		statlist1v1 = statsTable(gamesDB, gMatrix1v1, playerlist1v1, 1)
+		nplayers1v1 = range(len(playerlist1v1))
 
-		ngames = gameSummer(gMatrix)
-		win_pct = winPct(gamesDB, playerlist, gMatrix, ngames)
-		gdiff = pointDiff(gamesDB, playerlist)
+		playerlist2v2 = playerLister(gamesDB, 2)
+		gMatrix2v2 = gameMatrix(gamesDB, playerlist2v2, 2)	
+		statlist2v2 = statsTable(gamesDB, gMatrix2v2, playerlist2v2, 2)
+		nplayers2v2 = range(len(playerlist2v2))
 
-		out = scoreDiffAdj(gMatrix, gdiff)
-		gdg = out[0]
-		gdgadj = out[1]
+		playerlist1v2 = playerLister(gamesDB, 3)
+		gMatrix1v2 = gameMatrix(gamesDB, playerlist1v2, 3)	
+		statlist1v2 = statsTable(gamesDB, gMatrix1v2, playerlist1v2, 3)
+		nplayers1v2 = range(len(playerlist1v2))
 
-		nplayers = range(len(playerlist))
-		statlist = statSorter(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff, 2), roundCleaner(gdgadj, 2))
+		# ngames = gameSummer(gMatrix)
+		# win_pct = winPct(gamesDB, playerlist, gMatrix, ngames)
+		# gdiff = pointDiff(gamesDB, playerlist)
 
-		self.render('tester.html', 
-			nplayers = nplayers, 
-			statlist = statlist)
+		# out = scoreDiffAdj(gMatrix, gdiff)
+		# gdg = out[0]
+		# gdgadj = out[1]
+
+
+		
+		# statlist = statSorter(win_pct, playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff, 2), roundCleaner(gdgadj, 2))
+
+		self.render('tester.html',
+			data1 = playerlist1v2,
+			data2 = gMatrix1v2, 
+			nplayers1v1 = nplayers1v1,
+			statlist1v1 = statlist1v1,
+			nplayers2v2 = nplayers2v2,
+			statlist2v2 = statlist2v2, 
+			nplayers1v2 = nplayers1v2,
+			statlist1v2 = statlist1v2)
 
 
 application = webapp2.WSGIApplication([('/', Welcome),
@@ -239,6 +281,7 @@ application = webapp2.WSGIApplication([('/', Welcome),
 									   ('/welcome', Welcome),
 									   ('/log-out', Logout),
 									   ('/register', Register),
+									   ('/standings', Standings),
 									   ('/tester', Test),
 									   ('/output', Output),
 									   ('/holder_log', Holder_log)],
