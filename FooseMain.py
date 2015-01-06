@@ -316,7 +316,7 @@ class Test(Handler):
 
 		self.render('tester.html', 
 			data3 = player_set,
-			data1 = data1,
+			# data1 = data1,
 			data2 = player_dict)
 
 
