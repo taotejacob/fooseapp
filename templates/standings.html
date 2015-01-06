@@ -14,6 +14,7 @@
       <h2>Monthly League Standings</h2>
       <br>
       <h3>Singles</h3>
+
         <table data-role="table" id="singles_table" class="ui-responsive table-stroke">
           <thead>
            <tr>
@@ -37,6 +38,7 @@
           </tbody>
         </table>
         <br>
+
         <h3>Doubles</h3>
         <table data-role="table" id="doubles_table" class="ui-responsive table-stroke">
           <thead>
@@ -61,6 +63,7 @@
           </tbody>
         </table>
         <br>
+
         <h3>Cut-Throat</h3>
         <table data-role="table" id="doubles_table" class="ui-responsive table-stroke">
           <thead>
@@ -83,34 +86,13 @@
             {% endfor %}
           </tbody>
         </table>         
-
       <br>
-
-<!--       <h2>Recent Games</h2>
-
-      <table data-role="table" id="results_game_table" class="ui-responsive table-stroke">
-        <thead>
-         <tr>
-          <th>Winner</th>
-          <th>Opponent</th>
-          <th>Score</th>
-        </tr>
-        <tbody>
-          {% for r in last_games %}
-          <tr>
-            <th>{{p_out[r][0]}}</th>
-            <td>{{p_out[r][1]}}</td>
-            <td>{{p_out[r][2]}}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table> -->
 
       <a href="players" class="ui-btn">Input Scores</a>    
 
-  </div><!-- /content -->
+  </div>
 
-</div><!-- /page one -->
+</div>
 
 
 {% endblock %}

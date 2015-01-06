@@ -50,6 +50,7 @@ def inputUserData(work_email, first_name, last_name, user_name):
 				work_email = work_email,
 				first_name = first_name,
 				last_name = last_name,
+				first_last = first_name + " " + last_name[0]
 				)
 	p.put()
 
@@ -62,6 +63,7 @@ class Account(ndb.Model):
 	work_email = ndb.StringProperty()
 	first_name = ndb.StringProperty()
 	last_name = ndb.StringProperty()
+	first_last = ndb.StringProperty()
 
 def render_str(template, **params):
     t = jinja_env.get_template(template)
@@ -136,14 +138,21 @@ class game_event(db.Model):
 class Scores(Handler):
 	def get(self):
 		user_name = users.get_current_user()
-		self.render("scores.html", team_range = range(len(team_names)), team_names = team_names, logout_url=logout_url, user_nickname=user_name.nickname())
+
+		self.render("scores.html", 
+			team_range = range(len(team_names)), 
+			team_names = [eval(i) for i in team_names], 
+			logout_url=logout_url,
+			user_nickname=user_name.nickname())
 
 	def post(self):
 		global team_scores
 
 		team_scores = getScores(team_names, self)
 
-		uploadData(prepData(team_names, team_scores))
+		team_upload_names = [eval(i)[1] for i in team_names]
+
+		uploadData(prepData(team_upload_names, team_scores))
 
 		self.redirect("welcome")
 
@@ -210,19 +219,19 @@ class Standings(Handler):
 		playerlist1v1 = playerLister(gamesDB,1 )
 		gMatrix1v1 = gameMatrix(gamesDB, playerlist1v1, 1)
 		statlist1v1 = statsTable(gamesDB, gMatrix1v1, playerlist1v1, 1)
-		nplayers1v1 = range(len(playerlist1v1))
+		nplayers1v1 = range(len(statlist1v1))
 
 		playerlist2v2 = playerLister(gamesDB, 2)
 		gMatrix2v2 = gameMatrix(gamesDB, playerlist2v2, 2)	
 		statlist2v2 = statsTable(gamesDB, gMatrix2v2, playerlist2v2, 2)
-		nplayers2v2 = range(len(playerlist2v2))
+		nplayers2v2 = range(len(statlist2v2))
 
 		playerlist1v2 = playerLister(gamesDB, 3)
 		gMatrix1v2 = gameMatrix(gamesDB, playerlist1v2, 3)	
 		statlist1v2 = statsTable(gamesDB, gMatrix1v2, playerlist1v2, 3)
-		nplayers1v2 = range(len(playerlist1v2))
+		nplayers1v2 = range(len(statlist1v2))
 
-		self.render('tester.html',
+		self.render('standings.html',
 			nplayers1v1 = nplayers1v1,
 			statlist1v1 = statlist1v1,
 			nplayers2v2 = nplayers2v2,
@@ -235,44 +244,13 @@ class Standings(Handler):
 
 class Test(Handler):
 	def get(self):
-		gamesDB = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
+		# gamesDB = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
-		playerlist1v1 = playerLister(gamesDB,1 )
-		gMatrix1v1 = gameMatrix(gamesDB, playerlist1v1, 1)
-		statlist1v1 = statsTable(gamesDB, gMatrix1v1, playerlist1v1, 1)
-		nplayers1v1 = range(len(playerlist1v1))
+		for user in Account.query():
+		    user.first_last = user.first_name + " " + user.last_name
+		    user.put()
 
-		playerlist2v2 = playerLister(gamesDB, 2)
-		gMatrix2v2 = gameMatrix(gamesDB, playerlist2v2, 2)	
-		statlist2v2 = statsTable(gamesDB, gMatrix2v2, playerlist2v2, 2)
-		nplayers2v2 = range(len(playerlist2v2))
-
-		playerlist1v2 = playerLister(gamesDB, 3)
-		gMatrix1v2 = gameMatrix(gamesDB, playerlist1v2, 3)	
-		statlist1v2 = statsTable(gamesDB, gMatrix1v2, playerlist1v2, 3)
-		nplayers1v2 = range(len(playerlist1v2))
-
-		# ngames = gameSummer(gMatrix)
-		# win_pct = winPct(gamesDB, playerlist, gMatrix, ngames)
-		# gdiff = pointDiff(gamesDB, playerlist)
-
-		# out = scoreDiffAdj(gMatrix, gdiff)
-		# gdg = out[0]
-		# gdgadj = out[1]
-
-
-		
-		# statlist = statSorter(win_pct, playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff, 2), roundCleaner(gdgadj, 2))
-
-		self.render('tester.html',
-			data1 = playerlist1v2,
-			data2 = gMatrix1v2, 
-			nplayers1v1 = nplayers1v1,
-			statlist1v1 = statlist1v1,
-			nplayers2v2 = nplayers2v2,
-			statlist2v2 = statlist2v2, 
-			nplayers1v2 = nplayers1v2,
-			statlist1v2 = statlist1v2)
+		self.render('tester.html')
 
 
 application = webapp2.WSGIApplication([('/', Welcome),

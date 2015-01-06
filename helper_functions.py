@@ -74,7 +74,7 @@ def getGameId ():
 def GetPlayers(qry):
 	user_list = []
 	for players in qry:
-		user_list.append(str(players.username))
+		user_list.append([str(players.first_last), str(players.username)])
 	return(user_list)
 
 
@@ -308,30 +308,6 @@ def playerMatrix(gamesDB, player_list, name, game_type):
 
 	return ngames
 
-	# for player in player_list:
-	# 	i = 0
-	# 	for row in gamesDB:
-	# 		if name = row.player_id and player = row.opp_id:
-	# 			i = i + 1
-	# 	ngames.append(i)
-
-	# if game_type == '2v2': #for 2v2 games, combine players 1 & 2 into team name and check
-	# 	for team in player_list:
-	# 		i = 0
-	# 		for row in gamesDB:
-	# 			comb_playerteam = teamNamer([row.player_id, row.player_teammate_id]) #combine player ids to create 'and' team name
-	# 			if name == comb_playerteam and row.opp_id == team and row.game_type == game_type:
-	# 				i = i + 1
-	# 		ngames.append(i)
-
-	# else: ##for 1v1 and 1v2, only look at games of the appropriate type
-	# 	for player in player_list:
-	# 		i = 0
-	# 		for row in gamesDB:
-	# 			if row.player_id == name and (player in teamNamer([row.opp_id])) and row.game_type == game_type:
-	# 				i = i + 1
-	# 		ngames.append(i)
-	# return(ngames)
 
 #generate an opponent matrix for all players
 def gameMatrix(gamesDB, player_list, n):
@@ -435,14 +411,55 @@ def roundCleaner(mylist, n):
 		newlist.append(i)
 	return(newlist)
 
-#combine and sort multiple lists based on key list (which goes first)
-def statSorter(sort_key, playerlist, ngames, win_pct, gdiff, gdgadj):
-	combine_list = sorted(zip(sort_key, playerlist, ngames, win_pct, gdiff, gdgadj), reverse=True)
-	return combine_list
+# #combine and sort multiple lists based on key list (which goes first)
+# def statSorter(sort_key, playerlist, ngames, win_pct, gdiff, gdgadj, min_games):
+# 	combine_list = sorted(zip(sort_key, playerlist, ngames, win_pct, gdiff, gdgadj), reverse=True)
+	
+# 	#remove records where # of games played was below 5
+# 	combine_list_min = [i for i in combine_list if i[2] >= min_games]
 
+# 	return combine_list_min
+
+def p_scoreCalc(statdata_min):
+	win_pct = zip(*statdata_min)[2]
+	gdgadj = zip(*statdata_min)[4]
+
+	win_dist = []
+	gdg_dist = []
+
+	for p in win_pct:
+		a = float(max(win_pct) - p) / float(max(win_pct))
+		win_dist.append(a)
+
+	for g in gdgadj:
+		minval = float(max(gdgadj) - min(gdgadj)) #control for 0 gdgadj
+
+		if minval == 0:
+			a = 0
+		else:
+			a = float(max(gdgadj) - g) / minval
+
+		gdg_dist.append(a)
+
+	pvalues = [x+y for x,y in zip(win_dist, gdg_dist)]
+
+	# add p_score to begining of each list
+	for i in range(len(statdata_min)):
+		statdata_min[i] = [pvalues[i]] + list(statdata_min[i])
+
+	output = sorted(statdata_min, reverse = False)
+
+	return output
+
+def mingameRemove(playerlist, ngames, win_pct, gdiff, gdgadj, min_games):
+	statdata = zip(playerlist, ngames, win_pct, gdiff, gdgadj) #zip data together
+	statdata_min = [i for i in statdata if i[1] >= min_games]  #remove records where <min games
+	
+	return statdata_min
 
 def statsTable(gamesDB, gMatrix, playerlist, n):
 	game_type = type_def(n)
+	min_games = 5
 
 	ngames = gameSummer(gMatrix)
 	win_pct = winPct(gamesDB, playerlist, gMatrix, ngames, game_type)
@@ -450,5 +467,16 @@ def statsTable(gamesDB, gMatrix, playerlist, n):
 	out = scoreDiffAdj(gMatrix, gdiff)
 	gdg = out[0]
 	gdgadj = out[1]
-	output = statSorter(win_pct, playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff, 2), roundCleaner(gdgadj, 2))
-	return(output)
+
+	statdata_min = mingameRemove(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff,2), roundCleaner(gdgadj,2), min_games) #remove players with < min_games
+
+	#for case where not enough games
+	if len(statdata_min) == 0:
+		blank = [("-", "Not enough games", 0, 0, 0, 0)]
+		return blank
+
+	#for other cases, find p-values and sort
+	else:
+		statlist = p_scoreCalc(statdata_min) #calculate p_score & sort
+		return statlist
+		## 'p-score', 'playerName', 'Ngames', 'WinPct','PointDiff', 'AdjPoints'
