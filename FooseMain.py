@@ -89,15 +89,18 @@ class Welcome(Handler):
 		if q < 1:
 			self.redirect('register')
 
-		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
+		# players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
 
-		if players.count()>0:
-			win_data = winRank(players) 		#get win percentages
-			num_players = range(len(win_data)) 	#get number of players
+		# if players.count()>0:
+		# 	win_data = winRank(players) 		#get win percentages
+		# 	num_players = range(len(win_data)) 	#get number of players
 
-		else:
-			num_players = [0,1]
-			win_data = [["", ""],["", ""]]
+		# else:
+		# 	num_players = [0,1]
+		# 	win_data = [["", ""],["", ""]]
+
+		num_players = [0,1]
+		win_data = [["", ""],["", ""]]
 
 
 		self.render("welcome.html", 
