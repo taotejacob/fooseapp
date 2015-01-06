@@ -20,7 +20,7 @@
                     <legend>Select your team:</legend>
                     {% for player in num_players%}
                     <input type="checkbox" name="team_1" id="{{player+1}}" value="{{player_set[player]}}">
-                    <label for="{{player+1}}">{{player_set[player][0]}}</label>
+                    <label for="{{player+1}}">{{player_set[player]}}</label>
                     {% endfor %}
                 </fieldset>
 
@@ -30,7 +30,7 @@
                     <legend>Select your opponent(s):</legend>
                     {% for player in num_players%}
                     <input type="checkbox" name="team_2" id="{{player+2+num_players[-1]}}" value="{{player_set[player]}}">
-                    <label for="{{player+2+num_players[-1]}}">{{player_set[player][0]}}</label>
+                    <label for="{{player+2+num_players[-1]}}">{{player_set[player]}}</label>
                     {% endfor %}
                     <input type="text" name="team_2" id="{{(num_players[-1]+1)*2 + 1}}" placeholder="Other Name"/>
                 </fieldset>

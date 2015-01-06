@@ -21,7 +21,7 @@
                     <br>
 
                     {% for i in team_range %}
-                        <label for="score_{{ i }}">{{team_names[i][0]}}</label>
+                        <label for="score_{{ i }}">{{team_names[i]}}</label>
                         <input type="number" name="score_{{i+1}}" id="score_{{ i }}" max="9" min="0" placeholder="input score">
                     {% endfor %}
                     

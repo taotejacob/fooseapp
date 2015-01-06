@@ -74,7 +74,7 @@ def getGameId ():
 def GetPlayers(qry):
 	user_list = []
 	for players in qry:
-		user_list.append([str(players.first_last), str(players.username)])
+		user_list.append(str(players.first_last))
 	return(user_list)
 
 
