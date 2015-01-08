@@ -21,6 +21,10 @@ handlers:
   static_files: stylesheets/\1
   upload: stylesheets/(.*\.(js))
 
+- url: /favicon.ico
+  static_files: media/img/favicon.ico
+  upload: media/img/favicon.ico
+
 
 - url: /.*
   script: FooseMain.application

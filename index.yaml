@@ -17,6 +17,11 @@ indexes:
 
 - kind: game_event
   properties:
+  - name: game_type
+  - name: game_id
+
+- kind: game_event
+  properties:
   - name: opp_id
   - name: player_id
   - name: player_score

@@ -18,8 +18,10 @@
         <table data-role="table" id="singles_table" class="ui-responsive table-stroke">
           <thead>
            <tr>
+            <th>Rank</th>
             <th>Player</th>
             <th>Games</th>
+            <th>P-Score</th>
             <th>Win %</th>
             <th>Goal Diff</th>
             <th>Adj Goal Diff</th>
@@ -27,8 +29,10 @@
           <tbody>
             {% for p in nplayers1v1 %}
             <tr>
+              <td>{{p + 1}}</td>
               <td>{{statlist1v1[p][1]}}</td>
               <td>{{statlist1v1[p][2]}}</td>
+              <td>{{statlist1v1[p][0]}}</td>
               <td>{{statlist1v1[p][3]*100}}%</td>
               <td>{{statlist1v1[p][4]}}</td>
               <td>{{statlist1v1[p][5]}}</td>

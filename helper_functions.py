@@ -442,6 +442,7 @@ def p_scoreCalc(statdata_min):
 		gdg_dist.append(a)
 
 	pvalues = [x+y for x,y in zip(win_dist, gdg_dist)]
+	pvalues = roundCleaner(pvalues, 3)
 
 	# add p_score to begining of each list
 	for i in range(len(statdata_min)):
@@ -478,5 +479,148 @@ def statsTable(gamesDB, gMatrix, playerlist, n):
 	#for other cases, find p-values and sort
 	else:
 		statlist = p_scoreCalc(statdata_min) #calculate p_score & sort
+		statlist[0] = roundCleaner(statlist[0],2)
 		return statlist
 		## 'p-score', 'playerName', 'Ngames', 'WinPct','PointDiff', 'AdjPoints'
+
+
+
+
+
+
+
+
+
+##############################
+###
+###
+### Standings Database stuff
+###
+##############################
+
+
+#function to update record in dictionary
+def player_dict_update(player_dict, prepped_data):
+	opp = prepped_data[4]				#find opp name
+
+	data = [0,0,0.0]					#holder for game data
+
+	if opp in player_dict.keys():		#if opponent exists, pull out record
+		#some holder BS
+		data[0] = player_dict[opp][0]	
+		data[1] = player_dict[opp][1]
+		data[2] = player_dict[opp][2]
+
+		data[0] = data[0] + 1 						#increment games played
+		data[1] = data[1] + prepped_data[7] 		#add 0 if lost, 1 if won
+		data[2] = round(data[2] + prepped_data[8] - prepped_data[9],4) #update score differential
+
+		player_dict[opp] = data         #update record in dict
+
+	else:
+		player_dict[opp] = [1, prepped_data[7], round(prepped_data[8] - prepped_data[9],4)]  #create new record if no record exists
+
+	return(player_dict)
+
+
+def get1v1Standings(qry):
+
+	pname = []
+	pdicts = []
+
+	for row in qry:
+		pname.append(str(row.first_last))
+		pdicts.append(str(row.game_dict1v1))
+
+	return [pname, pdicts]
+
+
+
+def MatrixCalculator(pname, pdicts):
+
+	## number of players
+	nplayers = range(len(pname))
+			
+	gMatrix = []	#holder for game matrix - games played against each player
+	wMatrix = []	#holder for win matrix - wins against each player
+	pMatrix = []	#holder for point matrix - point diff against each player
+
+
+	##find gMatrix, wMatrix, pMatrix for each player
+	for n in nplayers:
+		player_dict = eval(pdicts[n])
+
+		nPGames = []
+		nWGames = []
+		win_pct = []
+		pPoints = []
+
+		for player in pname:
+			if player in player_dict.keys():
+				nPGames.append(player_dict[player][0])
+				nWGames.append(player_dict[player][1])
+				pPoints.append(player_dict[player][2])
+			else:
+				nPGames.append(0)
+				nWGames.append(0)
+				pPoints.append(0)
+
+		gMatrix.append(nPGames)
+		wMatrix.append(nWGames)
+		pMatrix.append(pPoints)
+
+	return [gMatrix, wMatrix, pMatrix]
+
+def WinPtsCalculator(MMatrix):
+
+	## number of players
+	nplayers = range(len(MMatrix[0][0]))
+	gMatrix = MMatrix[0]
+	wMatrix = MMatrix[1]
+	pMatrix = MMatrix[2]
+	##find Win Pct & Point Diff for each player
+	pointDiff = []
+	win_pct = []
+
+	for n in nplayers:
+		wins = sum(wMatrix[n])
+		tgam = sum(gMatrix[n])
+
+		if tgam > 0:
+			pct = float(wins)/float(tgam)
+			win_pct.append(pct)
+
+		pointDiff.append(sum(pMatrix[n]))
+
+	return [win_pct, pointDiff]
+
+def newStatTable(pname, pdicts):
+
+	MMatrix = MatrixCalculator(pname, pdicts)
+	OutComes = WinPtsCalculator(MMatrix)
+
+	min_games = 0
+
+	playerlist = pname
+	ngames = [sum(i) for i in MMatrix[0]]
+	win_pct = OutComes[0]
+	gdiff = OutComes[1]
+	out = scoreDiffAdj(MMatrix[0], gdiff)
+	gdg = out[0]
+	gdgadj = out[1]
+
+	statdata_min = mingameRemove(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff,2), roundCleaner(gdgadj,2), min_games) #remove players with < min_games
+
+	#for case where not enough games
+	if len(statdata_min) == 0:
+		blank = [("-", "Not enough games", 0, 0, 0, 0)]
+		return blank
+
+	#for other cases, find p-values and sort
+	else:
+		statlist = p_scoreCalc(statdata_min) #calculate p_score & sort
+		return statlist
+		## 'p-score', 'playerName', 'Ngames', 'WinPct','PointDiff', 'AdjPoints'
+
+
+
