@@ -599,7 +599,7 @@ def newStatTable(pname, pdicts):
 	MMatrix = MatrixCalculator(pname, pdicts)
 	OutComes = WinPtsCalculator(MMatrix)
 
-	min_games = 0
+	min_games = 5
 
 	playerlist = pname
 	ngames = [sum(i) for i in MMatrix[0]]

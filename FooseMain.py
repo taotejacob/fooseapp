@@ -316,33 +316,6 @@ class Standings(Handler):
 class Test(Handler):
 	def get(self):
 
-		############
-		###Function to give everyone game_dict1v1
-		############		
-
-		for user in Account.query():
-		    user.game_dict1v1 = "{ 'Ghost':[0,0,0] }"
-		    user.put()
-
-		###########    
-		##Function to add data into new account dictionaries
-        ###########
-
-		gamesDB = db.GqlQuery("SELECT * FROM game_event WHERE game_type = '1v1' AND player_win = 1")
-
-		data1 = []
-
-		for row in gamesDB:
-			ppplayers = [str(row.player_id), str(row.opp_id)]
-			ssscores = [row.player_score_z, row.opp_score_z]
-			prepped_data = prepData(ppplayers, ssscores)
-
-			for gme in prepped_data:
-				player_game_update(gme)
-
-###################
-
-
 		self.render('tester.html')
 
 
