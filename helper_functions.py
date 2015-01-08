@@ -590,6 +590,9 @@ def WinPtsCalculator(MMatrix):
 			pct = float(wins)/float(tgam)
 			win_pct.append(pct)
 
+		else:
+			win_pct.append(0)
+
 		pointDiff.append(sum(pMatrix[n]))
 
 	return [win_pct, pointDiff]
