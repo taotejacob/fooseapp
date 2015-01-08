@@ -307,6 +307,7 @@ class Test(Handler):
 		nplayers1v1 = range(len(statlist1v1))
 
 		MMatrix = MatrixCalculator(values[0], values[1])
+		OutComes = WinPtsCalculator(MMatrix)
 
 
 
@@ -314,7 +315,7 @@ class Test(Handler):
 			data1 = values[0],
 			data2 = values[1], 
 			data3 = nplayers1v1,
-			data4 = MMatrix)
+			data4 = OutComes)
 
 
 
