@@ -523,6 +523,30 @@ def player_dict_update(player_dict, prepped_data):
 	return(player_dict)
 
 
+def player_dict_update2v2(player_dict, prepped_data):
+
+	team_name = prepped_data[3]
+	opp_name = prepped_data[4]
+	win = prepped_data[7]
+	dif = prepped_data[8] - prepped_data[9]
+
+	if team_name in player_dict.keys():
+		if opp_name in player_dict[team_name]:
+			##add stuff together
+			dat = player_dict[team_name][opp_name]
+			dat[0] = dat[0] + 1
+			dat[1] = dat[1] + win
+			dat[2] = dat[2] + dif
+			player_dict[team_name][opp_name] = dat
+		else:
+			player_dict[team_name][opp_name] = [1,win,dif]
+
+	else:
+		player_dict[team_name] = {opp_name:[1,win,dif]}
+
+	return player_dict
+
+
 def get1v1Standings(qry):
 
 	pname = []
@@ -533,6 +557,108 @@ def get1v1Standings(qry):
 		pdicts.append(str(row.game_dict1v1))
 
 	return [pname, pdicts]
+
+def get2v2Standings(qry):
+
+	pname = []
+	pdicts = []
+
+	for row in qry:
+		pname.append(str(row.first_last))
+		pdicts.append(str(row.game_dict2v2))
+
+	return [pname, pdicts]
+
+def get2v2TeamNames(pname, pdict):
+	nplayers = range(len(pname))
+
+	teams2v2 = []
+
+	for n in nplayers:
+		tms = eval(pdict[n]).keys()
+		teams2v2.extend(tms)
+
+	output = list(set(teams2v2))
+	output.remove('Ghost')
+
+	return output
+
+
+def MatrixCalculator2v2(pname, pdicts, teamnames):
+	nplayers = range(len(pname))
+	nteams = range(len(teamnames))
+
+	gMatrix = []	#holder for game matrix - games played against each player
+	wMatrix = []	#holder for win matrix - wins against each player
+	pMatrix = []	#holder for point matrix - point diff against each player
+
+	hgames = {}
+	hwins = {}
+	hpoints = {}
+
+	for n in nplayers:
+		player_dict = eval(pdicts[n])  #select right player dictionary
+
+		for team in teamnames:		   #did player play on team_1
+
+			nPGames = []
+			nWGames = []
+			win_pct = []
+			pPoints = []
+
+			if team in player_dict.keys():  #if yes player was on team
+				for opp in teamnames:   #check values of each opponent
+					if opp in player_dict[team].keys(): #did this team play this opponent?
+						nPGames.append(player_dict[team][opp][0])
+						nWGames.append(player_dict[team][opp][1])
+						pPoints.append(player_dict[team][opp][2])
+					else:
+						nPGames.append(0)
+						nWGames.append(0)
+						pPoints.append(0)
+
+				hgames[team] = nPGames
+				hwins[team] = nWGames
+				hpoints[team] = pPoints
+
+	for team in teamnames:
+		gMatrix.append(hgames[team])
+		wMatrix.append(hwins[team])
+		pMatrix.append(hpoints[team])
+
+	return [gMatrix, wMatrix, pMatrix]
+			
+def newStatTable2v2(pname, pdicts):
+
+	teamnames = get2v2TeamNames(pname, pdicts)
+
+	MMatrix2v2 = MatrixCalculator2v2(pname, pdicts, teamnames)
+	OutComes2v2 = WinPtsCalculator(MMatrix2v2)
+
+	min_games = 0
+
+	playerlist = teamnames
+	ngames = [sum(i) for i in MMatrix2v2[0]]
+	win_pct = OutComes2v2[0]
+	gdiff = OutComes2v2[1]
+	out = scoreDiffAdj(MMatrix2v2[0], gdiff)
+	gdg = out[0]
+	gdgadj = out[1]
+
+	statdata_min = mingameRemove(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff,2), roundCleaner(gdgadj,2), min_games) #remove players with < min_games
+
+	#for case where not enough games
+	if len(statdata_min) == 0:
+		blank = [("-", "Not enough games", 0, 0, 0, 0)]
+		return blank
+
+	#for other cases, find p-values and sort
+	else:
+		statlist = p_scoreCalc(statdata_min) #calculate p_score & sort
+		return statlist
+		## 'p-score', 'playerName', 'Ngames', 'WinPct','PointDiff', 'AdjPoints'
+
+
 
 
 

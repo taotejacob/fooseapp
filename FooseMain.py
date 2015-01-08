@@ -82,20 +82,51 @@ def inputUserData(work_email, first_name, last_name, user_name):
 				first_name = first_name,
 				last_name = last_name,
 				first_last = first_name + " " + last_name[0],
-				game_dict1v1 = '{}'
+				game_dict1v1 = '{ "Ghost":[0,0,0] }',
+				game_id_list1v1 = '["."]',
+				game_dict2v2 = '{ "Ghost":[0,0,0] }',
+				game_id_list2v2 = '["."]'
 				)
 	p.put()
 
 
 
-#takes data and runs update function
+#takes data and runs update function for 1v1 games
 def player_game_update(prepped_data):
 	for user in Account.query(Account.first_last == prepped_data[2]):       #pull user from db
 		if user:														    #check if user exists
-			player_dict = eval(user.game_dict1v1)							    #get dictionary
+
+			##dictionary update
+			player_dict = eval(user.game_dict1v1)							#get dictionary
 			player_dict = player_dict_update(player_dict, prepped_data)		#update entry w/ prepped data
-			user.game_dict1v1 = str(player_dict)								#save back in db
+			user.game_dict1v1 = str(player_dict)							#save back in db
+
+
+			##game id list update
+			player_game_id_list = eval(user.game_id_list1v1)				#pull list of game ids
+			player_game_id_list.append(prepped_data[0])						#append latest game id
+			user.game_id_list1v1 = str(player_game_id_list)						#save back in db
+
 			user.put()														#put in db
+
+
+#takes data and runs update function for 2v2 games
+def player_game_update2v2(prepped_data):
+	for user in Account.query(Account.first_last == prepped_data[2]):       #pull user from db
+		if user:														    #check if user exists
+
+			##dictionary update
+			player_dict = eval(user.game_dict2v2)							#get dictionary
+			player_dict = player_dict_update2v2(player_dict, prepped_data)		#update entry w/ prepped data
+			user.game_dict2v2 = str(player_dict)							#save back in db
+
+
+			##game id list update
+			player_game_id_list = eval(user.game_id_list2v2)				#pull list of game ids
+			player_game_id_list.append(prepped_data[0])						#append latest game id
+			user.game_id_list2v2 = str(player_game_id_list)					#save back in db
+
+			user.put()	
 
 
 
@@ -117,6 +148,9 @@ class Account(ndb.Model):
 	last_name = ndb.StringProperty()
 	first_last = ndb.StringProperty()
 	game_dict1v1 = ndb.StringProperty()
+	game_id_list1v1 = ndb.StringProperty()
+	game_dict2v2 = ndb.StringProperty()
+	game_id_list2v2 = ndb.StringProperty()
 
 
 
@@ -192,7 +226,11 @@ class Players(Handler):
 		qry = Account.query().fetch()
 		player_set = GetPlayers(qry)
 		num_players=range(len(player_set))
-		self.render("players.html", logout_url=logout_url, user_nickname=user_name.nickname(), num_players=num_players, player_set=player_set)
+		self.render("players.html", 
+			logout_url=logout_url, 
+			user_nickname=user_name.nickname(), 
+			num_players=num_players, 
+			player_set=player_set)
 
 	def post(self):
 		user_name = users.get_current_user()
@@ -205,7 +243,10 @@ class Players(Handler):
 			self.redirect("scores")
 
 		else:
-			self.render("players.html", size_error = "There was something wrong with the teams you selected", logout_url=logout_url, user_nickname=user_name.nickname())
+			self.render("players.html", 
+				size_error = "There was something wrong with the teams you selected", 
+				logout_url=logout_url, 
+				user_nickname=user_name.nickname())
 
 
 class Scores(Handler):
@@ -229,6 +270,10 @@ class Scores(Handler):
 		if data_prepped[0][1] == '1v1':
 			for game_data in data_prepped:
 				player_game_update(game_data)
+
+		if data_prepped[0][1] == '2v2':
+			for game_data in data_prepped:
+				player_game_update2v2(game_data)
 
 		uploadData(data_prepped)
 
@@ -276,19 +321,21 @@ class Standings(Handler):
 		
 		## get names and dictionaries
 		qry = Account.query()
-		values = get1v1Standings(qry)
 
+		values = get1v1Standings(qry)
 		statlist1v1 = newStatTable(values[0], values[1])
 		nplayers1v1 = range(len(statlist1v1))
 
-
+		values2v2 = get2v2Standings(qry)
+		statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
+		nplayers2v2 = range(len(statlist2v2))
 
 
 		self.render('standings.html',
 			nplayers1v1 = nplayers1v1,
 			statlist1v1 = statlist1v1,
-			# nplayers2v2 = nplayers2v2,
-			# statlist2v2 = statlist2v2,
+			nplayers2v2 = nplayers2v2,
+			statlist2v2 = statlist2v2,
 			# nplayers1v2 = nplayers1v2,
 			# statlist1v2 = statlist1v2,
 			logout_url=logout_url, 
@@ -296,26 +343,42 @@ class Standings(Handler):
 
 
 
+
 class Test(Handler):
 	def get(self):
 
-		## get names and dictionaries
-		qry = Account.query()
-		values = get1v1Standings(qry)
+		##create game_id_list1v1
+		for user in Account.query():
+		    user.game_id_list1v1 = '["."]'
 
-		statlist1v1 = newStatTable(values[0], values[1])
-		nplayers1v1 = range(len(statlist1v1))
+		    user.game_dict2v2 = '{"Ghost" : [0,0,0]}'
+		    user.game_id_list2v2 = '["."]'
 
-		MMatrix = MatrixCalculator(values[0], values[1])
-		OutComes = WinPtsCalculator(MMatrix)
+		    user.put()
+
+		##add 2v2 games to account db
+		gamesDB = db.GqlQuery("SELECT * FROM game_event WHERE game_type = '2v2' AND player_win = 1")
+
+		data1 = []
+		id_val = []
+
+		for row in gamesDB:
+			ppplayers = [str(row.player_teammate_id), str(row.opp_id)]
+			ssscores = [row.player_score_z, row.opp_score_z]
+
+			#check if game has been entered
+			if row.game_id in id_val:
+				1+1
+			else:
+				prepped_data = prepData(ppplayers, ssscores)
+
+				for gme in prepped_data:
+					player_game_update2v2(gme)
+
+			id_val.append(row.game_id)
 
 
-
-		self.render('tester.html', 
-			data1 = values[0],
-			data2 = values[1], 
-			data3 = nplayers1v1,
-			data4 = OutComes)
+		self.render('tester.html')
 
 
 

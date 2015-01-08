@@ -47,8 +47,10 @@
         <table data-role="table" id="doubles_table" class="ui-responsive table-stroke">
           <thead>
            <tr>
+            <th>Rank</th>
             <th>Player</th>
             <th>Games</th>
+            <th>P-Score</th>
             <th>Win %</th>
             <th>Goal Diff</th>
             <th>Adj Goal Diff</th>
@@ -56,11 +58,13 @@
           <tbody>
             {% for p in nplayers2v2 %}
             <tr>
+              <td>{{p + 1}}</td>
               <td>{{statlist2v2[p][1]}}</td>
-              <td>{{statlist2v2[p][2]/2}}</td>
+              <td>{{statlist2v2[p][2]}}</td>
+              <td>{{statlist2v2[p][0]}}</td>
               <td>{{statlist2v2[p][3]*100}}%</td>
-              <td>{{statlist2v2[p][4]/2}}</td>
-              <td>{{statlist2v2[p][5]/2}}</td>
+              <td>{{statlist2v2[p][4]}}</td>
+              <td>{{statlist2v2[p][5]}}</td>
             </tr>
 
             {% endfor %}

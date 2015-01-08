@@ -25,6 +25,9 @@ handlers:
   static_files: media/img/favicon.ico
   upload: media/img/favicon\.ico
 
+- url: /media
+  static_dir: img  
+
 
 - url: /.*
   script: FooseMain.application
