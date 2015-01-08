@@ -284,23 +284,6 @@ class Standings(Handler):
 
 
 
-		# gamesDB = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
-
-		# playerlist1v1 = playerLister(gamesDB,1 )
-		# gMatrix1v1 = gameMatrix(gamesDB, playerlist1v1, 1)
-		# statlist1v1 = statsTable(gamesDB, gMatrix1v1, playerlist1v1, 1)
-		# nplayers1v1 = range(len(statlist1v1))
-
-		# playerlist2v2 = playerLister(gamesDB, 2)
-		# gMatrix2v2 = gameMatrix(gamesDB, playerlist2v2, 2)	
-		# statlist2v2 = statsTable(gamesDB, gMatrix2v2, playerlist2v2, 2)
-		# nplayers2v2 = range(len(statlist2v2))
-
-		# playerlist1v2 = playerLister(gamesDB, 3)
-		# gMatrix1v2 = gameMatrix(gamesDB, playerlist1v2, 3)	
-		# statlist1v2 = statsTable(gamesDB, gMatrix1v2, playerlist1v2, 3)
-		# nplayers1v2 = range(len(statlist1v2))
-
 		self.render('standings.html',
 			nplayers1v1 = nplayers1v1,
 			statlist1v1 = statlist1v1,
@@ -316,7 +299,18 @@ class Standings(Handler):
 class Test(Handler):
 	def get(self):
 
-		self.render('tester.html')
+		## get names and dictionaries
+		qry = Account.query()
+		values = get1v1Standings(qry)
+
+		statlist1v1 = newStatTable(values[0], values[1])
+		nplayers1v1 = range(len(statlist1v1))
+
+
+
+		self.render('tester.html', 
+			data1 = values[0],
+			data2 = values[1])
 
 
 
