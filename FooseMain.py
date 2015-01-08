@@ -306,7 +306,7 @@ class Test(Handler):
 		statlist1v1 = newStatTable(values[0], values[1])
 		nplayers1v1 = range(len(statlist1v1))
 
-		MMatrix = MatrixCalculator(pname, pdicts)
+		MMatrix = MatrixCalculator(values[0], values[1])
 
 
 
