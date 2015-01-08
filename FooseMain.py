@@ -306,13 +306,15 @@ class Test(Handler):
 		statlist1v1 = newStatTable(values[0], values[1])
 		nplayers1v1 = range(len(statlist1v1))
 
+		MMatrix = MatrixCalculator(pname, pdicts)
+
 
 
 		self.render('tester.html', 
 			data1 = values[0],
 			data2 = values[1], 
 			data3 = nplayers1v1,
-			data4 = statlist1v1)
+			data4 = MMatrix)
 
 
 
