@@ -310,7 +310,9 @@ class Test(Handler):
 
 		self.render('tester.html', 
 			data1 = values[0],
-			data2 = values[1])
+			data2 = values[1], 
+			data3 = nplayers1v1,
+			data4 = statlist1v1)
 
 
 
