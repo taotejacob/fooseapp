@@ -25,6 +25,36 @@
 ###################
 
 
+		# ##create game_id_list1v1
+		# for user in Account.query():
+		#     user.game_id_list1v1 = '["."]'
+
+		#     user.game_dict2v2 = '{"Ghost" : [0,0,0]}'
+		#     user.game_id_list2v2 = '["."]'
+
+		#     user.put()
+
+		# ##add 2v2 games to account db
+		# gamesDB = db.GqlQuery("SELECT * FROM game_event WHERE game_type = '2v2' AND player_win = 1")
+
+		# data1 = []
+		# id_val = []
+
+		# for row in gamesDB:
+		# 	ppplayers = [str(row.player_teammate_id), str(row.opp_id)]
+		# 	ssscores = [row.player_score_z, row.opp_score_z]
+
+		# 	#check if game has been entered
+		# 	if row.game_id in id_val:
+		# 		1+1
+		# 	else:
+		# 		prepped_data = prepData(ppplayers, ssscores)
+
+		# 		for gme in prepped_data:
+		# 			player_game_update2v2(gme)
+
+		# 	id_val.append(row.game_id)
+
 
 
 

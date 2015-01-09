@@ -21,12 +21,13 @@ handlers:
   static_files: stylesheets/\1
   upload: stylesheets/(.*\.(js))
 
-- url: /favicon\.ico
+- url: /favicon.ico
   static_files: media/img/favicon.ico
-  upload: media/img/favicon\.ico
+  upload: media/img/favicon.ico
 
-- url: /media
-  static_dir: img  
+- url: /media/img/
+  static_dir: media/img  
+
 
 
 - url: /.*

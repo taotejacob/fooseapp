@@ -12,9 +12,8 @@
     </div><!-- /header -->
 
 	<div role="main" class="ui-content">
-        {{test}}
 		<h2>Who played on the winning team?</h2>
-	
+	       {{error}}
             <form data-ajax="false" method="post">
                 <fieldset data-role="group3">
                     <legend>What were the scores?</legend> 
@@ -22,12 +21,16 @@
 
                     {% for i in team_range %}
                         <label for="score_{{ i }}">{{team_names[i]}}</label>
-                        <input type="number" name="score_{{i+1}}" id="score_{{ i }}" max="9" min="0" placeholder="input score">
+                        <input type="text" name="score_{{i+1}}" id="score_{{ i }}" placeholder="input score">
                     {% endfor %}
+
+                    <input type="hidden" value="{{team_names}}" name="team_names">
                     
                 </fieldset>
                 <br>
                 <input type="submit" value="Submit">
+                <br>
+                <p><b>Note:</b> When entering multiple games, seperate scores with a "-" but no space. For example, if Jacob beat Alex five to three, five to one, and five to two, he would enter: <br> Jacob: 5-5-5<br> Alex: 3-1-2</p>
             </form>
 
 	</div><!-- /content -->

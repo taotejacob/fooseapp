@@ -15,13 +15,9 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 
 #global variables
 team_names = []
-team_scores = []
 game_type = ""
 logout_url = users.create_logout_url('/log-out')
 login_url = users.create_login_url('/welcome')
-
-
-
 
 
 
@@ -197,23 +193,9 @@ class Welcome(Handler):
 		if q < 1:
 			self.redirect('register')
 
-		# players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
-
-		# if players.count()>0:
-		# 	win_data = winRank(players) 		#get win percentages
-		# 	num_players = range(len(win_data)) 	#get number of players
-
-		# else:
-		# 	num_players = [0,1]
-		# 	win_data = [["", ""],["", ""]]
-
-		num_players = [0,1]
-		win_data = [["", ""],["", ""]]
 
 
 		self.render("welcome.html", 
-			win_data=win_data, 
-			num_players=num_players, 
 			logout_url=logout_url, 
 			user_nickname=user_name.nickname())
 
@@ -226,6 +208,9 @@ class Players(Handler):
 		qry = Account.query().fetch()
 		player_set = GetPlayers(qry)
 		num_players=range(len(player_set))
+
+
+		
 		self.render("players.html", 
 			logout_url=logout_url, 
 			user_nickname=user_name.nickname(), 
@@ -251,6 +236,8 @@ class Players(Handler):
 
 class Scores(Handler):
 	def get(self):
+		global team_names
+
 		user_name = users.get_current_user()
 
 		self.render("scores.html", 
@@ -260,25 +247,63 @@ class Scores(Handler):
 			user_nickname=user_name.nickname())
 
 	def post(self):
-		global team_scores
+		global team_names
 
-		team_scores = getScores(team_names, self)
+		team_scores = getScores3(team_names, self) #return [(4-3), (5-6)] or "Error"
 
-		data_prepped = prepData(team_names, team_scores)
+		#if error tell player to try again
+		if type(team_scores) == type(''):
+			self.render("scores.html", 
+				team_range = range(len(eval(self.request.get('team_names')))), 
+				team_names = eval(self.request.get('team_names')), 
+				logout_url=logout_url,
+				error = "<i>" + team_scores + "</i><br><br>")
 
-		#only upload to account if 1v1 (for now!)
-		if data_prepped[0][1] == '1v1':
-			for game_data in data_prepped:
-				player_game_update(game_data)
+		#else input the data
+		else:
+			for game in team_scores:
+				data_prepped = prepData(team_names, game)
 
-		if data_prepped[0][1] == '2v2':
-			for game_data in data_prepped:
-				player_game_update2v2(game_data)
+				#only upload to account if 1v1 (for now!)
+				if data_prepped[0][1] == '1v1':
+					for game_data in data_prepped:
+						player_game_update(game_data)
 
-		uploadData(data_prepped)
+				if data_prepped[0][1] == '2v2':
+					for game_data in data_prepped:
+						player_game_update2v2(game_data)
 
-		self.redirect("welcome")
+				uploadData(data_prepped)
 
+			self.redirect("welcome")
+
+
+class Standings(Handler):
+	def get(self):
+		user_name = users.get_current_user()
+
+		
+		## get names and dictionaries
+		qry = Account.query()
+
+		values = get1v1Standings(qry)
+		statlist1v1 = newStatTable(values[0], values[1])
+		nplayers1v1 = range(len(statlist1v1))
+
+		values2v2 = get2v2Standings(qry)
+		statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
+		nplayers2v2 = range(len(statlist2v2))
+
+
+		self.render('standings.html',
+			nplayers1v1 = nplayers1v1,
+			statlist1v1 = statlist1v1,
+			nplayers2v2 = nplayers2v2,
+			statlist2v2 = statlist2v2,
+			# nplayers1v2 = nplayers1v2,
+			# statlist1v2 = statlist1v2,
+			logout_url=logout_url, 
+			user_nickname=user_name.nickname())
 
 
 class Logout(Handler):
@@ -311,72 +336,11 @@ class Output(Handler):
 		data = output_make(players)
 		n_rows = range(len(data))
 
-		self.render('output.html', data = data, n_rows=n_rows)	
-
-
-class Standings(Handler):
-	def get(self):
-		user_name = users.get_current_user()
-
-		
-		## get names and dictionaries
-		qry = Account.query()
-
-		values = get1v1Standings(qry)
-		statlist1v1 = newStatTable(values[0], values[1])
-		nplayers1v1 = range(len(statlist1v1))
-
-		values2v2 = get2v2Standings(qry)
-		statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
-		nplayers2v2 = range(len(statlist2v2))
-
-
-		self.render('standings.html',
-			nplayers1v1 = nplayers1v1,
-			statlist1v1 = statlist1v1,
-			nplayers2v2 = nplayers2v2,
-			statlist2v2 = statlist2v2,
-			# nplayers1v2 = nplayers1v2,
-			# statlist1v2 = statlist1v2,
-			logout_url=logout_url, 
-			user_nickname=user_name.nickname())
-
-
+		self.render('output.html', data = data, n_rows=n_rows)
 
 
 class Test(Handler):
 	def get(self):
-
-		# ##create game_id_list1v1
-		# for user in Account.query():
-		#     user.game_id_list1v1 = '["."]'
-
-		#     user.game_dict2v2 = '{"Ghost" : [0,0,0]}'
-		#     user.game_id_list2v2 = '["."]'
-
-		#     user.put()
-
-		# ##add 2v2 games to account db
-		# gamesDB = db.GqlQuery("SELECT * FROM game_event WHERE game_type = '2v2' AND player_win = 1")
-
-		# data1 = []
-		# id_val = []
-
-		# for row in gamesDB:
-		# 	ppplayers = [str(row.player_teammate_id), str(row.opp_id)]
-		# 	ssscores = [row.player_score_z, row.opp_score_z]
-
-		# 	#check if game has been entered
-		# 	if row.game_id in id_val:
-		# 		1+1
-		# 	else:
-		# 		prepped_data = prepData(ppplayers, ssscores)
-
-		# 		for gme in prepped_data:
-		# 			player_game_update2v2(gme)
-
-		# 	id_val.append(row.game_id)
-
 
 		self.render('tester.html')
 

@@ -78,7 +78,19 @@ def GetPlayers(qry):
 	return(user_list)
 
 
+def tieCheck(game_scores):
+	check = []
 
+	for game in game_scores:
+		if len(set(game)) == 1:
+			check.append(1)
+		else:
+			check.append(0)
+
+	if sum(check) > 0:
+		return True
+	else:
+		return False
 
 
 
@@ -150,16 +162,61 @@ def prepData(team_names, team_scores):
 
 	return(df)
 
-def getScores(team_names, self):
-	team_scores = []
+# #Old get score function
+# def getScores(team_names, self):
+# 	team_scores = []
 	
+# 	for n in range(len(team_names)):
+# 		score = "score_" + str((n+1))
+# 		team_scores.append(self.request.get(score))
+
+# 	team_scores = [int(x) for x in team_scores]
+
+# 	return team_scores
+
+
+#takes data from userinput and formats into usable score information
+def getScores3(team_names, self):
+	input_scores = []
+	game_scores = []
+	team_names = eval(self.request.get('team_names'))
+
 	for n in range(len(team_names)):
 		score = "score_" + str((n+1))
-		team_scores.append(self.request.get(score))
+		input_scores.append(str(self.request.get(score)))
 
-	team_scores = [int(x) for x in team_scores]
+	# upack scores when multiple games entered	
+	for n in input_scores:
+		scores = n.split('-')
+		scores = [int(x) for x in scores]
+		game_scores.append(scores)
 
-	return team_scores
+	# zip scores together
+	if len(team_names) < 3:
+		output = zip(game_scores[0], game_scores[1])
+
+	else:
+		output = zip(game_scores[0], game_scores[1], game_scores[2])
+
+	if validateScores(input_scores, output):
+		return validateScores(input_scores, output)
+	else:
+		return output
+
+
+def validateScores(input_scores, output):
+	error = None
+	##validate scores
+	if len(set([len(x) for x in input_scores])) != 1:	#Uneven # of scores
+		error = "You input the wrong number of scores"	
+
+	if tieCheck(output):							#game ended in tie
+		error = "This isn't soccer, we don't accept tie games"
+
+	if max(sum(output, ())) > 9:					#score over 9
+		error = "No scores above 9 allowed"
+
+	return error
 
 
 
@@ -441,7 +498,7 @@ def p_scoreCalc(statdata_min):
 
 		gdg_dist.append(a)
 
-	pvalues = [x+y for x,y in zip(win_dist, gdg_dist)]
+	pvalues = [(x+y)/2 for x,y in zip(win_dist, gdg_dist)]
 	pvalues = roundCleaner(pvalues, 3)
 
 	# add p_score to begining of each list
