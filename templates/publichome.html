@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	</head>
+
+
+<body style='background-image:url(/media/img/crossword.png)'>
+<!-- 	/* Background pattern from subtlepatterns.com */ -->
+		<div class='container'>
+			<div style='height:5px'></div>
+			<div class='head' style='border-bottom: 2px solid #0065bd; height: 30px;'>
+				<a href='/auth/welcome' style='margin-left:10px;'>Log in</a>&nbsp;&nbsp;&nbsp;
+				<a href='/auth/standings' style='margin-left:10px;'>View Standings</a>&nbsp;&nbsp;&nbsp;
+				<a href='/about' style='margin-left:10px;'>About</a>
+			</div>
+			<div class='row' style='height:300px'>
+				<div class='col-xs-2'>
+					<br>
+					<img src="/media/img/apple-touch-icon-120x120.png" alt="..." class="img-responsive img-circle center-block">
+				</div>
+				<div class='col-xs-8' style='color:#fff; background: #0065bd; height:300px'>
+					<h1>Welcome to EAB-Foosball.</h1>
+					<p class="lead">The unofficial home of foosball at EAB. A place to record, analyze, and obsess over all things foosball related.</p>
+					<br>
+					<a href='/auth/players' class='btn btn-default center-block' style='background:#0065bd; width: 150px; color:#fff; border: 1.5px solid'>Enter Games</a>
+					<br>
+				</div>
+				<div class='col-xs-2'>
+				</div>
+			</div>
+			<br>
+			<div class='row'>
+				<div class='col-xs-2'>
+				</div>
+				<div class='col-xs-4'>
+					<h3>This Week's Singles Leaders</h3>
+					<p>MVP: {{data[0][1]}}</p>
+					<p>Love of the Game: {{data[1][1]}} ({{data[1][0]}} games)</p>
+					<p>Heart of a Champion: {{data[2][1]}} ({{data[2][0]*100}}%)</p>
+					<p>Point Guard: {{data[3][1]}} ({{data[3][0]}} points)</p>
+				</div>
+				<div class='col-xs-4'>
+					<h3>This Week's Doubles Leaders</h3>
+					<p>MVP: {{data[4][1]}}</p>
+					<p>Love of the Game: {{data[5][1]}} ({{data[5][0]}} games)</p>
+					<p>Heart of a Champion: {{data[6][1]}} ({{data[6][0]*100}}%)</p>
+					<p>Point Guard: {{data[7][1]}} ({{data[7][0]}} points)</p>
+				</div>
+				<div class='col-xs-2'>
+				</div>
+			</div>
+		</div>
+		<br><br><br>
+		<br><br><br>
+		<br><br><br>
+		<p style="font-size: 1em; color: #193A49; margin:10px">This site is in no way affiliated with, or endorsed by The Advisory Board Company.</p>
+
+
+
+
+
+<!-- 
+<body style='background: #0065bd;'>
+
+	<div style="height:95vh;">
+		<br><br>
+		<div class="container">
+			<div class="row">
+				<div class='col-md-2'>
+				</div>
+				<div class="col-md-6">
+			    	<h1 style = "color: #193A49"><b>Welcome to EAB-Foosball.</b></h1>
+				</div>
+				<div class="col-md-4">
+				</div>
+			</div>
+
+			<div class='row'>
+				<div class='col-md-2'>
+				</div>
+				<div class='col-md-6'>
+				    <p class="lead" style="color: #fff">The unofficial home of foosball at EAB. A place to record, analyze, and obsess over all things foosball related.</p>
+				</div>
+
+				<div class="col-md-4">
+					<a class="btn btn-default" href="#about" style="background-color: #fff; padding: 5px; color: #193A49f; border: 1.5px solid #193A49; width: 150px">Sign Up</a>
+				</div>			
+			</div>
+			<br><br><br><br>
+			<div style='color:#fff'>
+				<h3>This Week's League Leaders</h3>
+				<p>MVP: XXXX</p>
+				<p>Love of the Game: XXXXXX (XX games)</p>
+				<p>Heart of a Champion: XXXXXX (XX %)</p>
+				<p>Point Guard: XXXXX (XX points)</p>
+			</div>
+		</div>
+	</div>
+
+
+	<div style="height:5vh;">
+		<div class='container'>
+			<br>
+			<p style="font-size: 1em; color: #fff">This site is in no way affiliated with, or endorsed by The Advisory Board Company.</p>
+		</div>
+	</div>
+
+
+ -->
+
+</body>
+</html>

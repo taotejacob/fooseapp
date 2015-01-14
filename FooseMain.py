@@ -124,6 +124,22 @@ def player_game_update2v2(prepped_data):
 
 			user.put()	
 
+#takes standings data and puts it into the standings database
+def standingPut(statlist1v1, statlist2v2):
+	singles = prepforWeekly(statlist1v1)
+	doubles = prepforWeekly(statlist2v2)
+
+	p = WeeklyStandings(mvp1v1 = str(singles[0]),
+				games1v1 = str(singles[1]),
+				winner1v1 = str(singles[2]),
+				points1v1 = str(singles[3]),
+				mvp2v2 = str(doubles[0]),
+				games2v2 = str(doubles[1]),
+				winner2v2 = str(doubles[2]),
+				points2v2 = str(doubles[3])
+				)
+	p.put()
+
 
 
 ########################################3
@@ -134,6 +150,19 @@ def player_game_update2v2(prepped_data):
 ##
 ########################################3
 
+#create database for weekly standings
+class WeeklyStandings(ndb.Model):
+	mvp1v1 = ndb.StringProperty(required = True)
+	games1v1 = ndb.StringProperty(required = True)
+	winner1v1 = ndb.StringProperty(required = True)
+	points1v1 = ndb.StringProperty(required = True)
+	mvp2v2 = ndb.StringProperty(required = True)
+	games2v2 = ndb.StringProperty(required = True)
+	winner2v2 = ndb.StringProperty(required = True)
+	points2v2 = ndb.StringProperty(required = True)
+	date = ndb.DateTimeProperty(auto_now_add = True)
+
+
 #create users database:
 class Account(ndb.Model):
 	username = ndb.StringProperty()
@@ -143,10 +172,12 @@ class Account(ndb.Model):
 	first_name = ndb.StringProperty()
 	last_name = ndb.StringProperty()
 	first_last = ndb.StringProperty()
-	game_dict1v1 = ndb.StringProperty()
-	game_id_list1v1 = ndb.StringProperty()
-	game_dict2v2 = ndb.StringProperty()
-	game_id_list2v2 = ndb.StringProperty()
+
+	#dictionaries to hold records
+	game_dict1v1 = ndb.TextProperty()
+	game_id_list1v1 = ndb.TextProperty()
+	game_dict2v2 = ndb.TextProperty()
+	game_id_list2v2 = ndb.TextProperty()
 
 
 
@@ -184,6 +215,20 @@ class game_event(db.Model):
 #####################################
 
 
+class PublicHome(Handler):
+	def get(self):
+		qry = ndb.gql("SELECT * FROM WeeklyStandings ORDER BY date DESC LIMIT 1")
+		weeklystand = getWeeklyStandings(qry)
+
+		self.render('publichome.html', 
+			data = weeklystand)
+
+
+class About(Handler):
+	def get(self):
+		self.render('about.html')
+
+
 class Welcome(Handler):
 	def get(self):
 		user_name = users.get_current_user()
@@ -191,7 +236,7 @@ class Welcome(Handler):
 		#Test if user is registered
 		q = Account.query(Account.username == user_name.nickname()).count()
 		if q < 1:
-			self.redirect('register')
+			self.redirect('/auth/register')
 
 
 
@@ -209,7 +254,6 @@ class Players(Handler):
 		player_set = GetPlayers(qry)
 		num_players=range(len(player_set))
 
-
 		
 		self.render("players.html", 
 			logout_url=logout_url, 
@@ -225,7 +269,7 @@ class Players(Handler):
 
 		if team_names != "Error":
 			team_names = [str(x) for x in team_names]
-			self.redirect("scores")
+			self.redirect("/auth/scores")
 
 		else:
 			self.render("players.html", 
@@ -275,7 +319,7 @@ class Scores(Handler):
 
 				uploadData(data_prepped)
 
-			self.redirect("welcome")
+			self.redirect("/auth/welcome")
 
 
 class Standings(Handler):
@@ -327,7 +371,7 @@ class Register(Handler):
 		first_name = self.request.get('first_name')
 		last_name = self.request.get('last_name')
 		inputUserData(work_email, first_name, last_name, user_name)
-		self.redirect("holder_log")
+		self.redirect("/auth/holder_log")
 
 
 class Output(Handler):
@@ -342,19 +386,28 @@ class Output(Handler):
 class Test(Handler):
 	def get(self):
 
+		qry = Account.query()
+		values = get1v1Standings(qry)
+		statlist1v1 = newStatTable(values[0], values[1])
+		values2v2 = get2v2Standings(qry)
+		statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
+		standingPut(statlist1v1, statlist2v2)
+
 		self.render('tester.html')
 
 
 
 
-application = webapp2.WSGIApplication([('/', Welcome),
-									   ('/players', Players),
-									   ('/scores', Scores),
-									   ('/welcome', Welcome),
-									   ('/log-out', Logout),
-									   ('/register', Register),
-									   ('/standings', Standings),
-									   ('/tester', Test),
-									   ('/output', Output),
-									   ('/holder_log', Holder_log)],
+application = webapp2.WSGIApplication([('/', PublicHome),
+									   ('/about', About),
+									   ('/auth/players', Players),
+									   ('/auth/scores', Scores),
+									   ('/auth/welcome', Welcome),
+									   ('/auth/', Welcome),
+									   ('/auth/log-out', Logout),
+									   ('/auth/register', Register),
+									   ('/auth/standings', Standings),
+									   ('/_min/', Test),
+									   ('/auth/output', Output),
+									   ('/auth/holder_log', Holder_log)],
 									    debug=True)

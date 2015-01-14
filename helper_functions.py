@@ -52,7 +52,7 @@ def teamCheck(team_1, team_2):
 	else:
 		return("Error")
 
-def getGameId ():
+def getGameId():
 	number = round(random.random()*10000000,0)
 	game_id = str(number)
 	return game_id
@@ -162,19 +162,6 @@ def prepData(team_names, team_scores):
 
 	return(df)
 
-# #Old get score function
-# def getScores(team_names, self):
-# 	team_scores = []
-	
-# 	for n in range(len(team_names)):
-# 		score = "score_" + str((n+1))
-# 		team_scores.append(self.request.get(score))
-
-# 	team_scores = [int(x) for x in team_scores]
-
-# 	return team_scores
-
-
 #takes data from userinput and formats into usable score information
 def getScores3(team_names, self):
 	input_scores = []
@@ -219,77 +206,9 @@ def validateScores(input_scores, output):
 	return error
 
 
-
-###############################
-####
-####  functions for calaculating results
-####
-###############################
-
-def findWins(dataset, player):
-	wins = 0.0
-	for row in dataset:
-		if row.player_id == player:
-			wins = wins + row.player_win
-	return wins
-
-def findGames(dataset, player):
-	games = 0.0
-	for row in dataset:
-		if row.player_id == player:
-			games = games + 1
-	return games
-
-def findWinPct(dataset, player):
-	wins = findWins(dataset, player) 
-	games = findGames(dataset,player)
-
-	if games == 0:
-		return 0
-	else:
-		return round(wins/games,2)
-
-def winSort(results):
-	return sorted(results, key = lambda results: results[1], reverse = True)
-
-def winRank(dataset):
-	players = []
-	for row in dataset:
-		players.append(row.player_id)
-	players = set([str(x) for x in players])
-
-	results = []
-	for player in players:
-		results.append([player,findWinPct(dataset, player)])		
-	return winSort(results)
-
-
-def gameSummer(players):
-
-	games = []
-	i = 0
-
-	for row in players:
-		if row.player_win == 1:		
-			player_team = str(row.player_teammate_id)
-			opp_team = str(row.opp_id)
-			score = str(row.player_score) + " - " + str(row.opp_score)
-			out = [player_team, opp_team, score, i]
-			games.append(out)
-			
-			if i > 0 and games[i][:3] == games[i - 1][:3]:
-				games[i][3] = i - 1
-
-			i = i + 1		
-
-	games = set(map(tuple, games)) #remove duplicates
-	games = sorted(games, key = lambda x: x[3], reverse = False) #sort
-
-	return map(list,games)
-
 #############################
 ###
-###  output generator
+###   generator
 ###
 #############################
 
@@ -341,75 +260,13 @@ def playerLister(gamesDB, n):
 
 	return list(set(playerlist))
 
-#generate one player's opponent matrix
-def playerMatrix(gamesDB, player_list, name, game_type):
-	ngames = []
-
-	for opponent in player_list:
-		i = 0
-		for row in gamesDB:
-
-			#these conditionals deal with special case for 2v2
-			if game_type == '2v2': 
-				player_team = row.player_teammate_id ##player_teammate_id already combines players into team
-				opp_team = row.opp_id
-			else:
-				player_team = row.player_id #player_id and player_teammate_id will be the same
-				opp_team = teamNamer([row.opp_id]) ##for 1v2 need to split opp_id into each
-
-			#add games within specific game type
-			if (name == player_team) and (opponent in opp_team) and row.game_type == game_type:
-				i = i + 1
-
-		ngames.append(i)
-
-	return ngames
-
-
-#generate an opponent matrix for all players
-def gameMatrix(gamesDB, player_list, n):
-	ngames = []
-	game_type = type_def(n)
-
-	for player in player_list:
-		ngames.append(playerMatrix(gamesDB, player_list, player, game_type))
-	return(ngames)
-
-#generate a players total point differential
-def playerpointDiff(gamesDB, name, game_type):
-	player_pts = 0
-	opp_pts = 0
-
-	for row in gamesDB:
-
-		#for 2v2 need to check against teammate_id
-		if game_type == '2v2':
-			team_name = row.player_teammate_id
-		else: 
-			team_name = row.player_id
-
-		#add up points
-		if team_name == name:
-			player_pts = player_pts + row.player_score_z
-			opp_pts = opp_pts + row.opp_score_z
-
-	return(player_pts - opp_pts)
-
-#generate all player's total point differential
-def pointDiff(gamesDB, player_list, game_type):
-	point_diff = []
-
-	for name in player_list:
-		diff = playerpointDiff(gamesDB, name, game_type)
-		point_diff.append(diff)
-	return(point_diff)
-
 #find number of games each player played
 def gameSummer(gMatrix):
 	ngames = [] #total games each player played
 	for g in gMatrix:
 		ngames.append(sum(g))
 	return(ngames)
+
 
 #calculate adjusted point differential
 def scoreDiffAdj(gMatrix, gdiff):
@@ -438,28 +295,6 @@ def scoreDiffAdj(gMatrix, gdiff):
 	output = [gdg, adjgdg]
 	return(output)
 
-#calculate each player's win percentage
-def winPct(gamesDB, player_list, gMatrix, ngames, game_type):
-
-	win_pct = []
-
-	for p in range(len(player_list)):
-		win = 0
-		for row in gamesDB:
-
-			#for 2v2 check against teammate_id
-			if game_type == '2v2':
-				team_name = row.player_teammate_id
-			else:
-				team_name = row.player_id
-
-			#add up wins
-			if team_name == player_list[p] and row.game_type == game_type:
-				win = win + row.player_win
-		win_pct.append(float(win) / float(ngames[p]))
-
-	return win_pct
-
 #round numbers in a list to the n'th digit
 def roundCleaner(mylist, n):
 	newlist = []
@@ -467,15 +302,6 @@ def roundCleaner(mylist, n):
 		i = round(float(i),n)
 		newlist.append(i)
 	return(newlist)
-
-# #combine and sort multiple lists based on key list (which goes first)
-# def statSorter(sort_key, playerlist, ngames, win_pct, gdiff, gdgadj, min_games):
-# 	combine_list = sorted(zip(sort_key, playerlist, ngames, win_pct, gdiff, gdgadj), reverse=True)
-	
-# 	#remove records where # of games played was below 5
-# 	combine_list_min = [i for i in combine_list if i[2] >= min_games]
-
-# 	return combine_list_min
 
 def p_scoreCalc(statdata_min):
 	win_pct = zip(*statdata_min)[2]
@@ -514,37 +340,6 @@ def mingameRemove(playerlist, ngames, win_pct, gdiff, gdgadj, min_games):
 	statdata_min = [i for i in statdata if i[1] >= min_games]  #remove records where <min games
 	
 	return statdata_min
-
-def statsTable(gamesDB, gMatrix, playerlist, n):
-	game_type = type_def(n)
-	min_games = 5
-
-	ngames = gameSummer(gMatrix)
-	win_pct = winPct(gamesDB, playerlist, gMatrix, ngames, game_type)
-	gdiff = pointDiff(gamesDB, playerlist, game_type)
-	out = scoreDiffAdj(gMatrix, gdiff)
-	gdg = out[0]
-	gdgadj = out[1]
-
-	statdata_min = mingameRemove(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff,2), roundCleaner(gdgadj,2), min_games) #remove players with < min_games
-
-	#for case where not enough games
-	if len(statdata_min) == 0:
-		blank = [("-", "Not enough games", 0, 0, 0, 0)]
-		return blank
-
-	#for other cases, find p-values and sort
-	else:
-		statlist = p_scoreCalc(statdata_min) #calculate p_score & sort
-		statlist[0] = roundCleaner(statlist[0],2)
-		return statlist
-		## 'p-score', 'playerName', 'Ngames', 'WinPct','PointDiff', 'AdjPoints'
-
-
-
-
-
-
 
 
 
@@ -716,9 +511,6 @@ def newStatTable2v2(pname, pdicts):
 		## 'p-score', 'playerName', 'Ngames', 'WinPct','PointDiff', 'AdjPoints'
 
 
-
-
-
 def MatrixCalculator(pname, pdicts):
 
 	## number of players
@@ -810,3 +602,33 @@ def newStatTable(pname, pdicts):
 
 
 
+
+#####################################3
+###
+###   CRON Job Functions
+###
+######################################
+
+#prep statlist data for entry into weekly standings database
+def prepforWeekly(statlist):
+	output = zip(*statlist)
+	pscore = list(sorted(zip(output[0], output[1]))[0])
+	games = list(sorted(zip(output[2], output[1]), reverse=True)[0])
+	winner = list(sorted(zip(output[3], output[1]), reverse=True)[0])
+	points = list(sorted(zip(output[5], output[1]), reverse=True)[0])
+	return [pscore, games, winner, points]
+
+
+#format data query from weekly standings database
+def getWeeklyStandings(qry):
+	output = []
+	for row in qry:
+		output.append(eval(row.mvp1v1))
+		output.append(eval(row.games1v1))
+		output.append(eval(row.winner1v1))
+		output.append(eval(row.points1v1))
+		output.append(eval(row.mvp2v2))
+		output.append(eval(row.games2v2))
+		output.append(eval(row.winner2v2))
+		output.append(eval(row.points2v2))
+	return output

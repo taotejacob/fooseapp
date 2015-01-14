@@ -29,7 +29,14 @@ handlers:
   static_dir: media/img  
 
 
+- url: /auth/.*
+  script: FooseMain.application
+  login: required
+
+- url: /_min/.*
+  script: FooseMain.application
+  login: admin
+
 
 - url: /.*
   script: FooseMain.application
-  login: required

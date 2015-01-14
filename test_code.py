@@ -1,62 +1,60 @@
 
-def tieCheck(game_scores):
-	check = []
-
-	for game in game_scores:
-		if len(set(game)) == 1:
-			check.append(1)
-		else:
-			check.append(0)
-
-	if sum(check) > 0:
-		return True
-	else:
-		return False
-
-def tester(team_names, input_scores):
-	game_scores = []
-
-	# upack scores when multiple games entered	
-	for n in input_scores:
-		scores = n.split('-')
-		scores = [int(x) for x in scores]
-		game_scores.append(scores)
-
-	# zip scores together
-	if len(team_names) < 3:
-		output = zip(game_scores[0], game_scores[1])
-
-	else:
-		output = zip(game_scores[0], game_scores[1], game_scores[2])
-
-	return output
-
-team_names = ['jacob', 'bob']
-input_scores = ['4-6-8-3', '2-3-5-30']
-# game_scores = zip(input_scores[0].split('-'), input_scores[1].split('-'))
-aaa = [[4,6,5,7], [2,3,4,5]]
-game_scores = tester(team_names, input_scores)
-error = None
+aa = {'Ghost': [0, 0, 0], 'Jacob R': [9, 6, 6.0], 'Griffin D': [5, 2, -4.0]}
+bb = {'Ghost': [0, 0, 0], 'Tyler M': [6, 6, 24.0], 'Griffin D': [7, 4, -2.0], 'Jacob R': [10, 6, 5.5]}
+cc = {'Ghost': [0, 0, 0], 'Tyler M': [6, 6, 24.0]}
 
 
-if len(set([len(x) for x in input_scores])) != 1:
-	error = "You input the wrong number of scores"	
+###add entries from arbitrary # of dictionaries to each other
+def dictAdd(a, *b):
+	##values added to dictorary listed first
+	new_dict = a.items()
+	new_dict = dict(new_dict)
 
-if tieCheck(game_scores):
-	error = "This isn't soccer, we don't have tie games"
+	#cycle through other listed dictionaries
+	for dictionary in b:
 
-if max(sum(game_scores, ())) > 9:
-	error = "No scores above 9 allowed"
+		#cycle through players listed in dictionary
+		for player in dictionary.keys():
+			if player in new_dict.keys(): #if exists add together
+				new_dict[player] = [x+y for x,y in zip(new_dict[player],dictionary[player])]
+			else: #else add new entry
+				new_dict[player] = dictionary[player]
 
-if error:
-	print error
+	return new_dict
 
-print game_scores
 
-print [zip(x) for x in aaa]
+print dictAdd(aa, bb, cc)
 
-a = "asdfasdf"
 
-print type(a) == type('')
+# from helper_functions import *
 
-# prepData(team_names, team_scores)
+values = get1v1Standings(qry)
+statlist1v1 = newStatTable(values[0], values[1])
+
+values2v2 = get2v2Standings(qry)
+statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
+
+
+
+
+
+
+
+
+# text_file = open("WeeklyStandings.txt", "w")
+# text_file.write("%s" % [prepforWeekly(statlist1v1), prepforWeekly(statlist2v2)])
+# text_file.close()
+
+
+# 'p-score' 'name' 'games' 'win%' 'goal diff' 'adj goals'
+
+# text_file = open("WeeklyStandings.txt", "w")
+# text_file.write("['Jacob', 'bob', 'mike']")
+# text_file.close()
+
+# new = open("WeeklyStandings.txt", "r")
+
+# # print new.read()
+
+# a = eval(new.read())
+# print a[0]
