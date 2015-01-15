@@ -587,7 +587,7 @@ def newStatTable(pname, pdicts):
 	gdg = out[0]
 	gdgadj = out[1]
 
-	statdata_min = mingameRemove(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdiff,2), roundCleaner(gdgadj,2), min_games) #remove players with < min_games
+	statdata_min = mingameRemove(playerlist, ngames, roundCleaner(win_pct,2), roundCleaner(gdg,2), roundCleaner(gdgadj,2), min_games) #remove players with < min_games
 
 	#for case where not enough games
 	if len(statdata_min) == 0:
