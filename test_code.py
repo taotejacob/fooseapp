@@ -26,35 +26,18 @@ def dictAdd(a, *b):
 print dictAdd(aa, bb, cc)
 
 
-# from helper_functions import *
 
-values = get1v1Standings(qry)
-statlist1v1 = newStatTable(values[0], values[1])
-
-values2v2 = get2v2Standings(qry)
-statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
+def GetProb(p1_rank, p2_rank):
+	return 1 / (1 + pow(2, float((p2_rank - p1_rank))/100))
 
 
+def ScoreUpdate(p1_win, p1_games, p1_rank, p2_games, p2_rank):
+	a = p1_win - (GetProb(p1_rank, p2_rank) * (1))
+	b = (p2_games + 1)  - (1)
+	c = (p1_games + 1) * (p2_games + 1)
+	out = 630 * a * b / float(c)
 
+	return out
 
-
-
-
-
-# text_file = open("WeeklyStandings.txt", "w")
-# text_file.write("%s" % [prepforWeekly(statlist1v1), prepforWeekly(statlist2v2)])
-# text_file.close()
-
-
-# 'p-score' 'name' 'games' 'win%' 'goal diff' 'adj goals'
-
-# text_file = open("WeeklyStandings.txt", "w")
-# text_file.write("['Jacob', 'bob', 'mike']")
-# text_file.close()
-
-# new = open("WeeklyStandings.txt", "r")
-
-# # print new.read()
-
-# a = eval(new.read())
-# print a[0]
+print ScoreUpdate(1, 6, 100, 6, 100)
+print ScoreUpdate(0, 6, 100, 6, 100)
