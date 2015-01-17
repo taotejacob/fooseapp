@@ -14,7 +14,9 @@
 			<div class='head' style='border-bottom: 2px solid #0065bd; height: 30px;'>
 				<a href='/auth/welcome' style='margin-left:10px;'>Log in</a>&nbsp;&nbsp;&nbsp;
 				<a href='/auth/standings' style='margin-left:10px;'>View Standings</a>&nbsp;&nbsp;&nbsp;
+				<a href='/auth/output' style='margin-left:10px;'>Recent Games</a>&nbsp;&nbsp;&nbsp;
 				<a href='/about' style='margin-left:10px;'>About</a>
+
 			</div>
 			<div class='row' style='height:300px'>
 				<div class='col-xs-2'>
@@ -29,6 +31,11 @@
 					<br>
 				</div>
 				<div class='col-xs-2'>
+					<br>
+					<p>Download Data</p>
+					<a href='/auth/download1v1'>Singles Games</a>
+					<br>
+					<a href='/auth/download2v2'>Doubles Games</a>
 				</div>
 			</div>
 			<br>
@@ -41,9 +48,10 @@
 					<p>Love of the Game: {{data[1][1]}} ({{data[1][0]}} games)</p>
 					<p>Heart of a Champion: {{data[2][1]}} ({{data[2][0]*100}}%)</p>
 					<p>Point Guard: {{data[3][1]}} ({{data[3][0]}} points)</p>
+					<p>Longest Win Streak: {{data[8][0]}} ({{data[8][1]}} games)<p>
 				</div>
 				<div class='col-xs-4'>
-					<h3>This Week's Doubles Leaders</h3>
+					<h3>All Time Doubles Leaders</h3>
 					<p>MVP: {{data[4][1]}}</p>
 					<p>Love of the Game: {{data[5][1]}} ({{data[5][0]}} games)</p>
 					<p>Heart of a Champion: {{data[6][1]}} ({{data[6][0]*100}}%)</p>

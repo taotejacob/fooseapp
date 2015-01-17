@@ -18,6 +18,12 @@ indexes:
 - kind: game_event
   properties:
   - name: game_type
+  - name: date
+    direction: desc
+
+- kind: game_event
+  properties:
+  - name: game_type
   - name: game_id
 
 - kind: game_event
@@ -26,3 +32,9 @@ indexes:
   - name: player_id
   - name: player_score
   - name: player_win
+
+- kind: game_event
+  properties:
+  - name: player_win
+  - name: date
+    direction: desc

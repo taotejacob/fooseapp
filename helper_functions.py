@@ -67,9 +67,6 @@ def getGameId():
 ###################################
 
 
-
-
-
 #Registration functions
 def GetPlayers(qry):
 	user_list = []
@@ -350,6 +347,24 @@ def mingameRemove(playerlist, ngames, win_pct, gdiff, gdgadj, min_games):
 ###
 ##############################
 
+###add entries from arbitrary # of dictionaries to each other
+def dictAdd(a, *b):
+	##values added to dictorary listed first
+	new_dict = a.items()
+	new_dict = dict(new_dict)
+
+	#cycle through other listed dictionaries
+	for dictionary in b:
+
+		#cycle through players listed in dictionary
+		for player in dictionary.keys():
+			if player in new_dict.keys(): #if exists add together
+				new_dict[player] = [x+y for x,y in zip(new_dict[player],dictionary[player])]
+			else: #else add new entry
+				new_dict[player] = dictionary[player]
+
+	return new_dict
+
 
 #function to update record in dictionary
 def player_dict_update(player_dict, prepped_data):
@@ -399,14 +414,25 @@ def player_dict_update2v2(player_dict, prepped_data):
 	return player_dict
 
 
-def get1v1Standings(qry):
+def get1v1Standings_t0(qry):
 
 	pname = []
 	pdicts = []
 
 	for row in qry:
 		pname.append(str(row.first_last))
-		pdicts.append(str(row.game_dict1v1))
+		pdicts.append(str(row.dict1v1_t0))
+
+	return [pname, pdicts]
+
+def get1v1Standings_sum(qry):
+
+	pname = []
+	pdicts = []
+
+	for row in qry:
+		pname.append(str(row.first_last))
+		pdicts.append(str(row.dict1v1_sum))
 
 	return [pname, pdicts]
 
@@ -487,7 +513,7 @@ def newStatTable2v2(pname, pdicts):
 	MMatrix2v2 = MatrixCalculator2v2(pname, pdicts, teamnames)
 	OutComes2v2 = WinPtsCalculator(MMatrix2v2)
 
-	min_games = 0
+	min_games = 3
 
 	playerlist = teamnames
 	ngames = [sum(i) for i in MMatrix2v2[0]]
@@ -631,4 +657,5 @@ def getWeeklyStandings(qry):
 		output.append(eval(row.games2v2))
 		output.append(eval(row.winner2v2))
 		output.append(eval(row.points2v2))
+		output.append(eval(row.winstreak1v1))
 	return output

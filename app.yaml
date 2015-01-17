@@ -34,6 +34,10 @@ handlers:
   login: required
 
 - url: /_min/.*
+  script: crontasks.application
+  login: admin
+
+- url: /tasks/.*
   script: FooseMain.application
   login: admin
 

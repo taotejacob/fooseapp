@@ -2,6 +2,7 @@ import os
 import jinja2
 import webapp2
 import random
+import csv
 
 from helper_functions import *
 
@@ -19,6 +20,83 @@ game_type = ""
 logout_url = users.create_logout_url('/log-out')
 login_url = users.create_login_url('/welcome')
 
+
+
+
+########################################3
+##
+##
+## Databases
+##
+##
+########################################3
+
+#create database for weekly standings
+class WeeklyStandings(ndb.Model):
+	mvp1v1 = ndb.StringProperty(required = True)
+	games1v1 = ndb.StringProperty(required = True)
+	winner1v1 = ndb.StringProperty(required = True)
+	points1v1 = ndb.StringProperty(required = True)
+	mvp2v2 = ndb.StringProperty(required = True)
+	games2v2 = ndb.StringProperty(required = True)
+	winner2v2 = ndb.StringProperty(required = True)
+	points2v2 = ndb.StringProperty(required = True)
+	date = ndb.DateTimeProperty(auto_now_add = True)
+	winstreak1v1 = ndb.StringProperty()
+
+
+#create users database:
+class Account(ndb.Model):
+	username = ndb.StringProperty()
+	#userid = ndb.FloatProperty()
+	email = ndb.StringProperty()
+	work_email = ndb.StringProperty()
+	first_name = ndb.StringProperty()
+	last_name = ndb.StringProperty()
+	first_last = ndb.StringProperty()
+
+	#dictionaries to hold records
+	game_dict1v1 = ndb.TextProperty()
+	game_id_list1v1 = ndb.TextProperty()
+	game_dict2v2 = ndb.TextProperty()
+	game_id_list2v2 = ndb.TextProperty()
+
+	#1v1 ranking info
+	win_streak1v1 = ndb.IntegerProperty()
+	total_points1v1 = ndb.IntegerProperty()
+	ranking1v1 = ndb.FloatProperty()
+
+	#weekly dictionaries
+	dict1v1_t0 = ndb.TextProperty()
+	dict1v1_sum = ndb.TextProperty()
+
+
+
+#create game_event database
+class game_event(db.Model):
+	game_id = db.StringProperty(required = True)
+	game_type = db.StringProperty(required = True)
+
+	#main player and possible teammate
+	player_id = db.StringProperty(required = True) 
+	player_teammate_id = db.StringProperty(required = True) 
+
+	#opponent(s)
+	opp_id = db.StringProperty(required = True) 
+	
+	#score information
+	player_score =  db.IntegerProperty(required = True)
+	opp_score =  db.IntegerProperty(required = True)
+	
+	#did the main player win?
+	player_win = db.IntegerProperty(required = True)
+
+	#scores normalized to 10 point scale
+	player_score_z = db.FloatProperty(required = True)
+	opp_score_z =  db.FloatProperty(required = True)
+	
+	#game date
+	date = db.DateTimeProperty(auto_now_add = True)
 
 
 
@@ -81,7 +159,12 @@ def inputUserData(work_email, first_name, last_name, user_name):
 				game_dict1v1 = '{ "Ghost":[0,0,0] }',
 				game_id_list1v1 = '["."]',
 				game_dict2v2 = '{ "Ghost":[0,0,0] }',
-				game_id_list2v2 = '["."]'
+				game_id_list2v2 = '["."]',
+				win_streak1v1 = 0,
+				total_points1v1 = 0,
+				ranking1v1 = 450,
+				dict1v1_t0 = '{ "Ghost":[0,0,0] }',
+				dict1v1_sum = '{ "Ghost":[0,0,0] }'
 				)
 	p.put()
 
@@ -92,16 +175,33 @@ def player_game_update(prepped_data):
 	for user in Account.query(Account.first_last == prepped_data[2]):       #pull user from db
 		if user:														    #check if user exists
 
-			##dictionary update
+			##total dictionary update
 			player_dict = eval(user.game_dict1v1)							#get dictionary
 			player_dict = player_dict_update(player_dict, prepped_data)		#update entry w/ prepped data
-			user.game_dict1v1 = str(player_dict)							#save back in db
+			
+			##this week's dict update
+			player_dict_t0 = eval(user.dict1v1_t0)							
+			player_dict_t0 = player_dict_update(player_dict_t0, prepped_data)
 
+			##add this week's dict to total
+			player_dict_sum = eval(user.dict1v1_sum)							
+			player_dict_sum = player_dict_update(player_dict_sum, prepped_data)
+
+			##save both dict's back into db
+			user.game_dict1v1 = str(player_dict)							
+			user.dict1v1_t0 = str(player_dict_t0)
+			user.dict1v1_sum = str(player_dict_sum)
+
+			#winstreak update
+			user.win_streak1v1 = (user.win_streak1v1 + 1)* prepped_data[7]
+
+			#update total points
+			user.total_points1v1 = user.total_points1v1 + prepped_data[5] + prepped_data[6]
 
 			##game id list update
 			player_game_id_list = eval(user.game_id_list1v1)				#pull list of game ids
 			player_game_id_list.append(prepped_data[0])						#append latest game id
-			user.game_id_list1v1 = str(player_game_id_list)						#save back in db
+			user.game_id_list1v1 = str(player_game_id_list)					#save back in db
 
 			user.put()														#put in db
 
@@ -129,6 +229,12 @@ def standingPut(statlist1v1, statlist2v2):
 	singles = prepforWeekly(statlist1v1)
 	doubles = prepforWeekly(statlist2v2)
 
+	qry = ndb.gql("SELECT * FROM Account ORDER BY win_streak1v1 DESC LIMIT 1")
+
+	for row in qry:
+		longest_streak_name = str(row.first_last)
+		longest_streak_record = row.win_streak1v1
+
 	p = WeeklyStandings(mvp1v1 = str(singles[0]),
 				games1v1 = str(singles[1]),
 				winner1v1 = str(singles[2]),
@@ -136,76 +242,11 @@ def standingPut(statlist1v1, statlist2v2):
 				mvp2v2 = str(doubles[0]),
 				games2v2 = str(doubles[1]),
 				winner2v2 = str(doubles[2]),
-				points2v2 = str(doubles[3])
+				points2v2 = str(doubles[3]),
+				winstreak1v1 = str([longest_streak_name, longest_streak_record])
 				)
 	p.put()
 
-
-
-########################################3
-##
-##
-## Databases
-##
-##
-########################################3
-
-#create database for weekly standings
-class WeeklyStandings(ndb.Model):
-	mvp1v1 = ndb.StringProperty(required = True)
-	games1v1 = ndb.StringProperty(required = True)
-	winner1v1 = ndb.StringProperty(required = True)
-	points1v1 = ndb.StringProperty(required = True)
-	mvp2v2 = ndb.StringProperty(required = True)
-	games2v2 = ndb.StringProperty(required = True)
-	winner2v2 = ndb.StringProperty(required = True)
-	points2v2 = ndb.StringProperty(required = True)
-	date = ndb.DateTimeProperty(auto_now_add = True)
-
-
-#create users database:
-class Account(ndb.Model):
-	username = ndb.StringProperty()
-	#userid = ndb.FloatProperty()
-	email = ndb.StringProperty()
-	work_email = ndb.StringProperty()
-	first_name = ndb.StringProperty()
-	last_name = ndb.StringProperty()
-	first_last = ndb.StringProperty()
-
-	#dictionaries to hold records
-	game_dict1v1 = ndb.TextProperty()
-	game_id_list1v1 = ndb.TextProperty()
-	game_dict2v2 = ndb.TextProperty()
-	game_id_list2v2 = ndb.TextProperty()
-
-
-
-#create game_event database
-class game_event(db.Model):
-	game_id = db.StringProperty(required = True)
-	game_type = db.StringProperty(required = True)
-
-	#main player and possible teammate
-	player_id = db.StringProperty(required = True) 
-	player_teammate_id = db.StringProperty(required = True) 
-
-	#opponent(s)
-	opp_id = db.StringProperty(required = True) 
-	
-	#score information
-	player_score =  db.IntegerProperty(required = True)
-	opp_score =  db.IntegerProperty(required = True)
-	
-	#did the main player win?
-	player_win = db.IntegerProperty(required = True)
-
-	#scores normalized to 10 point scale
-	player_score_z = db.FloatProperty(required = True)
-	opp_score_z =  db.FloatProperty(required = True)
-	
-	#game date
-	date = db.DateTimeProperty(auto_now_add = True)
 
 
 #####################################
@@ -330,7 +371,7 @@ class Standings(Handler):
 		## get names and dictionaries
 		qry = Account.query()
 
-		values = get1v1Standings(qry)
+		values = get1v1Standings_sum(qry) 					#uses records from last 2 weeks only
 		statlist1v1 = newStatTable(values[0], values[1])
 		nplayers1v1 = range(len(statlist1v1))
 
@@ -376,24 +417,53 @@ class Register(Handler):
 
 class Output(Handler):
 	def get(self):
-		players = db.GqlQuery("SELECT * FROM game_event ORDER BY date DESC")
+		players = db.GqlQuery("SELECT * FROM game_event WHERE player_win = 1 ORDER BY date DESC LIMIT 10")
 		data = output_make(players)
 		n_rows = range(len(data))
 
 		self.render('output.html', data = data, n_rows=n_rows)
 
 
-class Test(Handler):
+class Download1v1(Handler):
 	def get(self):
+		players = db.GqlQuery("SELECT * FROM game_event WHERE game_type = '1v1' ORDER BY date DESC")
+		self.response.headers['Content-Type'] = 'text/csv'
+		self.response.headers['Content-Disposition'] = 'attachment; filename=Singles.Games.csv'
+		writer = csv.writer(self.response.out)
+		writer.writerow(['Game ID', 'Type', 'Player', 'Teammate', 'Opponent', 'Player Win?', 'Player Score', 'Opp Score', 'Date'])
+		
+		for row in players:
+			writer.writerow([row.game_id, row.game_type, row.player_id, row.player_teammate_id, row.opp_id, row.player_win, row.player_score, row.opp_score, row.date])
 
+
+class Download2v2(Handler):
+	def get(self):
+		players = db.GqlQuery("SELECT * FROM game_event WHERE game_type = '2v2' ORDER BY date DESC")
+		self.response.headers['Content-Type'] = 'text/csv'
+		self.response.headers['Content-Disposition'] = 'attachment; filename=Doubles.Games.csv'
+		writer = csv.writer(self.response.out)
+		writer.writerow(['Game ID', 'Type', 'Player', 'Teammate', 'Opponent', 'Player Win?', 'Player Score', 'Opp Score', 'Date'])
+		
+		for row in players:
+			writer.writerow([row.game_id, row.game_type, row.player_id, row.player_teammate_id, row.opp_id, row.player_win, row.player_score, row.opp_score, row.date])
+
+
+class WeeklyUpdate(Handler): #update singles scores and front page standings
+	def get(self):
 		qry = Account.query()
-		values = get1v1Standings(qry)
-		statlist1v1 = newStatTable(values[0], values[1])
-		values2v2 = get2v2Standings(qry)
-		statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
-		standingPut(statlist1v1, statlist2v2)
 
-		self.render('tester.html')
+		values = get1v1Standings_t0(qry) 					#get singles standings from prior week
+		statlist1v1 = newStatTable(values[0], values[1])
+
+		values2v2 = get2v2Standings(qry) 					#get doubles standings from (all time)
+		statlist2v2 = newStatTable2v2(values2v2[0], values2v2[1])
+
+		standingPut(statlist1v1, statlist2v2) 				#update database
+
+		for user in qry: 
+			user.dict1v1_sum = user.dict1v1_t0				#more last weeks scores into sum		
+			user.dict1v1_t0 = '{ "Ghost":[0,0,0] }'			#set last week's scores to zero
+			user.put()
 
 
 
@@ -407,7 +477,9 @@ application = webapp2.WSGIApplication([('/', PublicHome),
 									   ('/auth/log-out', Logout),
 									   ('/auth/register', Register),
 									   ('/auth/standings', Standings),
-									   ('/_min/', Test),
 									   ('/auth/output', Output),
-									   ('/auth/holder_log', Holder_log)],
+									   ('/auth/holder_log', Holder_log),
+									   ('/auth/download1v1', Download1v1),
+									   ('/auth/download2v2', Download2v2),
+									   ('/tasks/task1', WeeklyUpdate)],
 									    debug=True)

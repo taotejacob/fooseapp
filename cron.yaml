@@ -1,0 +1,4 @@
+cron:
+- description: update weekly standings
+  url: /tasks/task1
+  schedule: every sunday 23:00
