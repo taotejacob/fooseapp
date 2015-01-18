@@ -74,7 +74,7 @@ class Handler(webapp2.RequestHandler):
 class Mail(Handler):
 	def get(self):
 
-		message = mail.EmailMessage(sender="Foos Master <eab-foos@example.com>",
+		message = mail.EmailMessage(sender="Foos Master <eabfoosball@gmail.com>",
 		                            subject="Your Weekly Update")
 
 		message.to = "<jacob.rosch@gmail.com>"
