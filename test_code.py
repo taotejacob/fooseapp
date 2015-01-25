@@ -1,27 +1,28 @@
 
-aa = {'Ghost': [0, 0, 0], 'Jacob R': [9, 6, 6.0], 'Griffin D': [5, 2, -4.0]}
-bb = {'Ghost': [0, 0, 0], 'Tyler M': [6, 6, 24.0], 'Griffin D': [7, 4, -2.0], 'Jacob R': [10, 6, 5.5]}
-cc = {'Ghost': [0, 0, 0], 'Tyler M': [6, 6, 24.0]}
+p1v1dict = {'Alex B': [4, 1, -9.36], 'Ghost': [0, 0, 0], 'Pat R': [1, 0, -1.43], 'tom t': [2, 0, -10.0]}
+opponent = 'Alex B'
+p_win = 1
+diff = 2.36
+
+
+def p_dict_update(p1v1dict, opponent, p_win, diff):
+
+	p_dict = eval(p1v1dict)
+
+	results = p_dict[opponent]
+
+	results[0] = results[0] - 1
+	results[1] = results[1] - p_win
+	results[2] = results[2] - diff
+
+	p_dict[opponent] = results
+
+	return p_dict
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                     
 
 
 
-
-def GetProb(p1_rank, p2_rank):
-	return 1 / (1 + pow(2, float((p2_rank - p1_rank))/100))
-
-
-def ScoreUpdate(p1_points, p1_games, p1_rank, p2_points, p2_games, p2_rank):
-	a = p1_points - (GetProb(p1_rank, p2_rank) * (p1_points + p2_points))
-	b = p2_games  - (p1_points + p2_points)
-	c = p1_games * p2_games
-	out1 = 630 * a * b / float(c)
-
-	a = p2_points - (GetProb(p2_rank, p1_rank) * (p2_points + p1_points))
-	b = p1_games  - (p2_points + p1_points)
-	c = p2_games * p1_games
-	out2 = 630 * a * b / float(c)
-
-	return [out1 + p1_rank, out2 + p2_rank]
-
-print ScoreUpdate(1, 12, 100, 5, 12, 100)
+print p_dict_update(p1v1dict, opponent, p_win, diff)
 

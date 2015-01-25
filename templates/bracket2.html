@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="tourney">
+
+    <div data-role="header">
+        <a href="/auth/welcome" data-icon="home">Home</a>
+        <h1>Tournament Time</h1>
+        <a href="{{logout_url}}" data-icon="minus">Log Out</a>
+    </div><!-- /header -->
+
+	<div role="main" class="ui-content">
+        <br>
+		<h2>{{round_name}}</h2>
+	      {{data1}}
+            <form data-ajax="false" method="post">
+                <fieldset data-role="group3">
+                    <br>
+                    {% for i in inputHTML %}
+                        {{i}}
+                    {% endfor %}
+
+                    <input type="hidden" value="{{matchups}}" name="round_matchups">
+
+                    
+                </fieldset>
+                <br>
+
+            </form>
+
+	</div><!-- /content -->
+
+</div><!-- /page one -->
+
+
+{% endblock %}

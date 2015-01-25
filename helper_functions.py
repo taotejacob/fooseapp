@@ -32,7 +32,7 @@ def teamNamer(team):
 		return team
 
 def teamCheck(team_1, team_2):
-	#global team_names
+	#remove value from 'other' if it's blank
 	if team_2[-1] == "":
 		del team_2[-1]
 
@@ -162,12 +162,18 @@ def prepData(team_names, team_scores):
 #takes data from userinput and formats into usable score information
 def getScores3(team_names, self):
 	input_scores = []
-	game_scores = []
+	
 	team_names = eval(self.request.get('team_names'))
 
 	for n in range(len(team_names)):
 		score = "score_" + str((n+1))
 		input_scores.append(str(self.request.get(score)))
+
+	return unpackPrep(input_scores, team_names, self)
+
+#once scores are recieved, converts to usable format
+def unpackPrep(input_scores, team_names, self):
+	game_scores = []
 
 	# upack scores when multiple games entered	
 	for n in input_scores:
@@ -513,7 +519,7 @@ def newStatTable2v2(pname, pdicts):
 	MMatrix2v2 = MatrixCalculator2v2(pname, pdicts, teamnames)
 	OutComes2v2 = WinPtsCalculator(MMatrix2v2)
 
-	min_games = 3
+	min_games = 5
 
 	playerlist = teamnames
 	ngames = [sum(i) for i in MMatrix2v2[0]]

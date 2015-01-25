@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="tourney">
+
+    <div data-role="header">
+        <a href="/auth/welcome" data-icon="home">Home</a>
+        <h1>Delete a Game</h1>
+        <a href="{{logout_url}}" data-icon="minus">Log Out</a>
+    </div><!-- /header -->
+
+	<div role="main" class="ui-content">
+        <br>
+		<h2>Select Players</h2>
+            <form data-ajax="false" method="post">
+                <fieldset data-role="group1">
+                        <label for="del_it">Enter Game ID</label>
+                        <input type="text" name="del_it" id="del_it" placeholder="Game ID">   
+                </fieldset>
+                <br>
+                <input type="submit" value="Submit">
+            </form>
+            <br><br>
+            {{data1}}
+
+	</div><!-- /content -->
+
+</div><!-- /page one -->
+
+
+{% endblock %}

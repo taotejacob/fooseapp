@@ -1,3 +1,24 @@
+
+##############
+### Function to creat winstreak, total points, ranking, and weekly dictionary
+##############
+
+
+		qry = Account.query()
+
+		for row in qry:
+			row.win_streak1v1 = 0
+			row.total_points1v1 = 0
+			row.ranking1v1 = 450
+			row.dict1v1_sum = row.game_dict1v1
+			row.dict1v1_t0 = row.game_dict1v1
+
+			row.put()
+
+
+
+
+
 		############
 		###Function to give everyone game_dict1v1
 		############		
